@@ -51,6 +51,7 @@ document.getElementById('enterDashboardBtn').addEventListener('click', () => {
 
 // ===================== PROFILE PHOTO: Camera + Browse Files =====================
 const avatarCircle = document.querySelector('.avatar-circle-sm');
+const defaultAvatarHTML = avatarCircle.innerHTML;
 function handlePhotoFile(file){
   if(!file) return;
   if(!file.type.startsWith('image/')){
@@ -176,12 +177,111 @@ const icons = {
     toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
   }
 
+  // ===================== SIDEBAR NAVIGATION =====================
+  // Wire every sidebar item that has a data-key to the matching entry in
+  // quickLinks, so it opens the same portal as its Quick Links tile.
+  const sidebarEl = document.getElementById('sidebar');
+  const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+  function openSidebar(){
+    sidebarEl.classList.add('show');
+    sidebarBackdrop.classList.add('show');
+  }
+  function closeSidebar(){
+    sidebarEl.classList.remove('show');
+    sidebarBackdrop.classList.remove('show');
+  }
+  document.getElementById('hamburgerBtn').addEventListener('click', openSidebar);
+  document.getElementById('sidebarCloseBtn').addEventListener('click', closeSidebar);
+  sidebarBackdrop.addEventListener('click', closeSidebar);
+
+  const sidebarLinks = document.querySelectorAll('.sidebar .side-link');
+  function setActiveSidebarLink(el){
+    sidebarLinks.forEach(l => l.classList.remove('active'));
+    if(el) el.classList.add('active');
+  }
+  document.getElementById('navDashboard').addEventListener('click', (e) => {
+    setActiveSidebarLink(e.currentTarget);
+    closeSidebar();
+  });
+  document.querySelectorAll('.sidebar .side-link[data-key]').forEach(link => {
+    link.addEventListener('click', () => {
+      const key = link.getAttribute('data-key');
+      const item = quickLinks.find(q => q.key === key);
+      setActiveSidebarLink(link);
+      closeSidebar();
+      if(item) openPortal(item.label, item.url);
+    });
+  });
+
   const modal = document.getElementById('settingsModal');
   document.getElementById('settingsBtn').addEventListener('click', () => modal.classList.add('show'));
-  document.getElementById('sidebarSettingsLink').addEventListener('click', () => modal.classList.add('show'));
+  document.getElementById('sidebarSettingsLink').addEventListener('click', (e) => {
+    setActiveSidebarLink(e.currentTarget);
+    closeSidebar();
+    modal.classList.add('show');
+  });
   document.getElementById('closeSettings').addEventListener('click', () => modal.classList.remove('show'));
   modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('show'); });
   document.getElementById('profileCta').addEventListener('click', () => document.getElementById('browseInput').click());
+
+  // ===================== BELL / NOTIFICATIONS =====================
+  document.getElementById('notifBtn').addEventListener('click', () => {
+    window.open('https://www.iub.edu.pk/news-update', '_blank', 'noopener');
+  });
+
+  // ===================== SETTINGS: CHANGE MODE (NIGHT/DAY) =====================
+  const modeToggle = document.getElementById('modeToggle');
+  const modeKnob = modeToggle.querySelector('.knob');
+  const modeTxt = modeToggle.querySelector('.txt');
+  function applyTheme(dark){
+    document.body.classList.toggle('dark-mode', dark);
+    modeToggle.classList.toggle('on', dark);
+    modeKnob.textContent = dark ? '☀️' : '🌙';
+    modeTxt.textContent = dark ? 'DAY MODE' : 'NIGHT MODE';
+    try{ localStorage.setItem('iub-theme', dark ? 'dark' : 'light'); }catch(e){}
+  }
+  modeToggle.addEventListener('click', () => applyTheme(!document.body.classList.contains('dark-mode')));
+  let savedTheme = 'light';
+  try{ savedTheme = localStorage.getItem('iub-theme') || 'light'; }catch(e){}
+  applyTheme(savedTheme === 'dark');
+
+  // ===================== SETTINGS: CHANGE LANGUAGE (EN / UR) =====================
+  const languageRow = document.getElementById('languageRow');
+  const languageValue = document.getElementById('languageValue');
+  function applyLanguage(lang){
+    document.documentElement.lang = lang === 'ur' ? 'ur' : 'en';
+    document.body.classList.toggle('lang-ur', lang === 'ur');
+    document.querySelectorAll('[data-en]').forEach(el => {
+      el.textContent = lang === 'ur' ? el.getAttribute('data-ur') : el.getAttribute('data-en');
+    });
+    document.querySelectorAll('[data-en-placeholder]').forEach(el => {
+      el.placeholder = lang === 'ur' ? el.getAttribute('data-ur-placeholder') : el.getAttribute('data-en-placeholder');
+    });
+    languageValue.textContent = lang === 'ur' ? 'اردو' : 'English';
+    try{ localStorage.setItem('iub-lang', lang); }catch(e){}
+  }
+  languageRow.addEventListener('click', () => {
+    const next = document.documentElement.lang === 'ur' ? 'en' : 'ur';
+    applyLanguage(next);
+  });
+  let savedLang = 'en';
+  try{ savedLang = localStorage.getItem('iub-lang') || 'en'; }catch(e){}
+  applyLanguage(savedLang);
+
+  // ===================== SETTINGS: SIGN OUT =====================
+  document.getElementById('signOutRow').addEventListener('click', () => {
+    modal.classList.remove('show');
+    document.getElementById('usernameInput').value = '';
+    avatarCircle.innerHTML = defaultAvatarHTML;
+    const navTxt = document.querySelector('.nav-profile .txt');
+    const navPic = document.querySelector('.nav-profile .pic');
+    if(navTxt) navTxt.innerHTML = 'Hi,<small>Good Morning</small>';
+    if(navPic) navPic.textContent = '';
+    dashboardScreen.style.display = 'none';
+    welcomeScreen.style.display = 'none';
+    loginScreen.style.display = 'flex';
+    showToast('Signed out');
+  });
 
   document.getElementById('quickSearch').addEventListener('input', (e) => {
     const q = e.target.value.trim().toLowerCase();
@@ -246,10 +346,15 @@ const icons = {
     // destination blocks embedding (or the proxy isn't deployed yet) —
     // surface the exit hatch fast instead of leaving a silent blank frame.
     clearTimeout(portalStuckTimer);
-    portalStuckTimer = setTimeout(() => portalStuck.classList.add('show'), 2200);
+    portalStuck.classList.remove('show');
+    portalStuckTimer = setTimeout(() => portalStuck.classList.add('show'), 3500);
   }
   portalFrame.addEventListener('load', () => {
     clearTimeout(portalStuckTimer);
+    // The frame loaded successfully — make sure the "stuck" overlay (which
+    // may have already appeared if loading took longer than the timeout)
+    // is hidden so it doesn't sit on top of a working page.
+    portalStuck.classList.remove('show');
     portalProgress.style.transition = 'width .3s ease';
     portalProgress.style.width = '100%';
     setTimeout(() => { portalProgress.style.opacity = '0'; }, 350);

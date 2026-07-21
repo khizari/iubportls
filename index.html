@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IUB All In One Portal — Web</title>
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/logo-192.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
@@ -17,7 +20,7 @@
       <div class="split-deco d1"></div>
       <div class="split-deco d2"></div>
       <div class="split-brand-content">
-        <div class="auth-mark">IUB</div>
+        <div class="auth-mark"><img src="assets/logo.png" alt="IUB logo"></div>
         <h1>All In One Portal</h1>
         <p>Admissions, results, fee vouchers, timetables, and every other university service — in a single sign-in.</p>
         <div class="split-stats">
@@ -58,9 +61,7 @@
       <div class="split-deco d1"></div>
       <div class="split-deco d2"></div>
       <div class="split-brand-content">
-        <div class="welcome-icon">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2 3 7l9 5 9-5-9-5Z"/><path d="M3 12l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg>
-        </div>
+        <div class="welcome-icon"><img src="assets/logo.png" alt="IUB logo"></div>
         <h1 id="welcomeGreeting">Welcome, abc 👋</h1>
         <p>Everything from admissions to attendance, results to announcements — all in one portal built for IUB students.</p>
       </div>
@@ -107,16 +108,19 @@
 
   <!-- ===================== TOP NAV ===================== -->
   <div class="topnav">
+    <button class="nav-icon-btn hamburger-btn" id="hamburgerBtn" title="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
     <div class="brand">
-      <div class="mark">IUB</div>
+      <div class="mark"><img src="assets/logo.png" alt="IUB logo"></div>
       <span>All In One Portal</span>
     </div>
     <div class="nav-search">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="quickSearch" placeholder="Search a portal or service…">
+      <input type="text" id="quickSearch" placeholder="Search a portal or service…" data-en-placeholder="Search a portal or service…" data-ur-placeholder="پورٹل یا سروس تلاش کریں…">
     </div>
     <div class="nav-right">
-      <button class="nav-icon-btn" title="Notifications">
+      <button class="nav-icon-btn" id="notifBtn" title="Notifications">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       </button>
       <button class="nav-icon-btn" id="settingsBtn" title="Settings">
@@ -131,49 +135,54 @@
 
   <div class="layout">
 
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
     <!-- ===================== SIDEBAR ===================== -->
-    <div class="sidebar">
-      <div class="side-link active">
+    <div class="sidebar" id="sidebar">
+      <button class="sidebar-close-btn" id="sidebarCloseBtn" title="Close menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="side-link active" id="navDashboard">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>
-        Dashboard
+        <span data-en="Dashboard" data-ur="ڈیش بورڈ">Dashboard</span>
       </div>
-      <div class="side-link">
+      <div class="side-link" data-key="documents">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/></svg>
-        My Documents
+        <span data-en="My Documents" data-ur="میرے دستاویزات">My Documents</span>
       </div>
-      <div class="side-link">
+      <div class="side-link" data-key="liveChat">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
-        Live Chat
+        <span data-en="Live Chat" data-ur="لائیو چیٹ">Live Chat</span>
       </div>
 
-      <div class="cat">Academics</div>
-      <div class="side-link">
+      <div class="cat" data-en="Academics" data-ur="تعلیمی">Academics</div>
+      <div class="side-link" data-key="courses">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-        Courses
+        <span data-en="Courses" data-ur="کورسز">Courses</span>
       </div>
-      <div class="side-link">
+      <div class="side-link" data-key="timetable">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Time Table
+        <span data-en="Time Table" data-ur="ٹائم ٹیبل">Time Table</span>
       </div>
-      <div class="side-link">
+      <div class="side-link" data-key="entryTest">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        Entry Test
+        <span data-en="Entry Test" data-ur="انٹری ٹیسٹ">Entry Test</span>
       </div>
 
-      <div class="cat">Finance</div>
-      <div class="side-link">
+      <div class="cat" data-en="Finance" data-ur="مالیات">Finance</div>
+      <div class="side-link" data-key="vouchers">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
-        Vouchers
+        <span data-en="Vouchers" data-ur="واؤچرز">Vouchers</span>
       </div>
-      <div class="side-link">
+      <div class="side-link" data-key="scholarship">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M9.7 13.5 8 22l4-2 4 2-1.7-8.5"/></svg>
-        Scholarships
+        <span data-en="Scholarships" data-ur="وظائف">Scholarships</span>
       </div>
 
-      <div class="cat">Account</div>
+      <div class="cat" data-en="Account" data-ur="اکاؤنٹ">Account</div>
       <div class="side-link" id="sidebarSettingsLink">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
-        Settings
+        <span data-en="Settings" data-ur="ترتیبات">Settings</span>
       </div>
     </div>
 
@@ -201,14 +210,14 @@
       </div>
 
       <div class="section-head">
-        <h3>Quick Links</h3>
+        <h3 data-en="Quick Links" data-ur="فوری روابط">Quick Links</h3>
         <span style="font-size:12px;color:var(--text-muted)" id="quickLinkCount">services</span>
       </div>
       <div class="quick-grid" id="quickGrid"></div>
 
       <div class="section-head">
-        <h3>Announcements</h3>
-        <button>View all</button>
+        <h3 data-en="Announcements" data-ur="اعلانات">Announcements</h3>
+        <button data-en="View all" data-ur="سب دیکھیں">View all</button>
       </div>
       <div class="announce-list">
         <div class="announce-item">
@@ -227,29 +236,22 @@
   <!-- ===================== SETTINGS PANEL ===================== -->
   <div class="settings-overlay" id="settingsModal">
     <div class="settings-panel">
-      <h3>Settings</h3>
+      <h3 data-en="Settings" data-ur="ترتیبات">Settings</h3>
       <div class="modal-row">
-        <span class="label">Change Mode</span>
+        <span class="label" data-en="Change Mode" data-ur="موڈ تبدیل کریں">Change Mode</span>
         <div class="toggle" id="modeToggle">
           <span class="txt">NIGHT MODE</span>
           <div class="knob">🌙</div>
         </div>
       </div>
-      <div class="modal-row">
-        <span class="label">Change Language</span>
-        <span class="value">English / اردو</span>
+      <div class="modal-row" id="languageRow">
+        <span class="label" data-en="Change Language" data-ur="زبان تبدیل کریں">Change Language</span>
+        <span class="value" id="languageValue">English</span>
       </div>
-      <div class="modal-row">
-        <span class="label">Home Screen Style</span>
-        <span class="value">Style 1</span>
+      <div class="modal-row danger" id="signOutRow">
+        <span class="label" data-en="Sign Out" data-ur="سائن آؤٹ">Sign Out</span>
       </div>
-      <div class="modal-row danger">
-        <span class="label">Change Profile Photo &amp; Name</span>
-      </div>
-      <div class="modal-row">
-        <span class="label">Sign Out</span>
-      </div>
-      <button class="close-settings" id="closeSettings">Close</button>
+      <button class="close-settings" id="closeSettings" data-en="Close" data-ur="بند کریں">Close</button>
       <div class="app-version">App version 5.7</div>
     </div>
   </div>
