@@ -317,21 +317,12 @@ const icons = {
   const portalTitle = document.getElementById('portalTitle');
   const portalOpenNew = document.getElementById('portalOpenNew');
   const portalProgress = document.getElementById('portalProgress');
-  const portalStuck = document.getElementById('portalStuck');
-  const portalStuckOpen = document.getElementById('portalStuckOpen');
-  const portalNote = document.getElementById('portalNote');
-  if (portalNote && PROXY_BASE) {
-    portalNote.textContent = 'Routed through the IUB portal proxy — some JS-heavy pages may still not fully work. If it stays blank, use "Open in new tab" above.';
-  }
-  let portalStuckTimer;
 
   function openPortal(label, url){
     if(!url) return showToast(label + ' — link coming soon');
     portalTitle.textContent = label;
     // "Open in new tab" always points at the real IUB URL, never the proxy
     portalOpenNew.href = url;
-    portalStuckOpen.href = url;
-    portalStuck.classList.remove('show');
     portalProgress.style.transition = 'none';
     portalProgress.style.width = '0%';
     portalProgress.style.opacity = '1';
@@ -341,28 +332,14 @@ const icons = {
     });
     portalFrame.src = proxiedUrl(url);
     portalModal.classList.add('show');
-
-    // Best-effort: if the frame hasn't loaded shortly, most likely the
-    // destination blocks embedding (or the proxy isn't deployed yet) —
-    // surface the exit hatch fast instead of leaving a silent blank frame.
-    clearTimeout(portalStuckTimer);
-    portalStuck.classList.remove('show');
-    portalStuckTimer = setTimeout(() => portalStuck.classList.add('show'), 3500);
   }
   portalFrame.addEventListener('load', () => {
-    clearTimeout(portalStuckTimer);
-    // The frame loaded successfully — make sure the "stuck" overlay (which
-    // may have already appeared if loading took longer than the timeout)
-    // is hidden so it doesn't sit on top of a working page.
-    portalStuck.classList.remove('show');
     portalProgress.style.transition = 'width .3s ease';
     portalProgress.style.width = '100%';
     setTimeout(() => { portalProgress.style.opacity = '0'; }, 350);
   });
   document.getElementById('closePortal').addEventListener('click', () => {
-    clearTimeout(portalStuckTimer);
     portalModal.classList.remove('show');
-    portalStuck.classList.remove('show');
     portalFrame.src = 'about:blank';
   });
   portalModal.addEventListener('click', (e) => { if(e.target === portalModal) document.getElementById('closePortal').click(); });
