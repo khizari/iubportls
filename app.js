@@ -16,14 +16,23 @@ function goToWelcome(name){
   welcomeScreen.style.display = 'flex';
 }
 
+// Picks the right greeting based on the current time of day.
+function timeOfDayGreeting(){
+  const hour = new Date().getHours();
+  if(hour < 12) return t('Good Morning', 'صبح بخیر');
+  if(hour < 17) return t('Good Afternoon', 'دوپہر بخیر');
+  if(hour < 21) return t('Good Evening', 'شام بخیر');
+  return t('Good Night', 'شب بخیر');
+}
+
 function updateGreeting(){
   const navTxt = document.querySelector('.nav-profile .txt');
   if(!navTxt) return;
   if(currentUserName){
     navTxt.innerHTML = t('Hi ', '') + currentUserName + (currentLang === 'ur' ? '،' : ',') +
-      '<small>' + t('Good Morning', 'صبح بخیر') + '</small>';
+      '<small>' + timeOfDayGreeting() + '</small>';
   } else {
-    navTxt.innerHTML = t('Hi,', '') + '<small>' + t('Good Morning', 'صبح بخیر') + '</small>';
+    navTxt.innerHTML = t('Hi,', '') + '<small>' + timeOfDayGreeting() + '</small>';
   }
 }
 
@@ -68,8 +77,18 @@ document.getElementById('enterDashboardBtn').addEventListener('click', () => {
 });
 
 // ===================== PROFILE PHOTO: Camera + Browse Files =====================
-const avatarCircle = document.querySelector('.avatar-circle-sm');
-const defaultAvatarHTML = avatarCircle.innerHTML;
+// Two avatar previews exist (login screen + settings panel), plus the small
+// nav-bar avatar — all three stay in sync whenever a new photo is chosen.
+const avatarCircles = document.querySelectorAll('.avatar-circle-sm');
+const defaultAvatarHTML = avatarCircles[0].innerHTML;
+function setAvatarImage(dataUrl){
+  avatarCircles.forEach(el => { el.innerHTML = `<img src="${dataUrl}" alt="Profile photo">`; });
+  const navPic = document.querySelector('.nav-profile .pic');
+  if(navPic) navPic.innerHTML = `<img src="${dataUrl}" alt="">`;
+}
+function resetAvatarImage(){
+  avatarCircles.forEach(el => { el.innerHTML = defaultAvatarHTML; });
+}
 function handlePhotoFile(file){
   if(!file) return;
   if(!file.type.startsWith('image/')){
@@ -77,40 +96,113 @@ function handlePhotoFile(file){
     return;
   }
   const reader = new FileReader();
-  reader.onload = (e) => {
-    avatarCircle.innerHTML = `<img src="${e.target.result}" alt="Profile photo">`;
-    const navPic = document.querySelector('.nav-profile .pic');
-    if(navPic) navPic.innerHTML = `<img src="${e.target.result}" alt="">`;
-  };
+  reader.onload = (e) => setAvatarImage(e.target.result);
   reader.readAsDataURL(file);
 }
-document.getElementById('cameraBtn').addEventListener('click', () => document.getElementById('cameraInput').click());
 document.getElementById('browseBtn').addEventListener('click', () => document.getElementById('browseInput').click());
-document.getElementById('cameraInput').addEventListener('change', (e) => handlePhotoFile(e.target.files[0]));
 document.getElementById('browseInput').addEventListener('change', (e) => handlePhotoFile(e.target.files[0]));
+document.getElementById('settingsBrowseBtn').addEventListener('click', () => document.getElementById('settingsBrowseInput').click());
+document.getElementById('settingsBrowseInput').addEventListener('change', (e) => handlePhotoFile(e.target.files[0]));
+
+// ===================== LIVE CAMERA CAPTURE =====================
+// Camera buttons open an actual live camera feed (getUserMedia) so they're
+// visually and functionally distinct from Browse Files, which always opens
+// the plain file/gallery picker. If the browser or device has no camera
+// access, we fall back to the file input's capture-mode picker instead.
+const cameraModal = document.getElementById('cameraModal');
+const cameraVideo = document.getElementById('cameraVideo');
+const cameraCanvas = document.getElementById('cameraCanvas');
+let cameraStream = null;
+let cameraFallbackInput = null;
+
+async function openCamera(fallbackInput){
+  cameraFallbackInput = fallbackInput;
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    fallbackInput.click();
+    return;
+  }
+  try{
+    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+    cameraVideo.srcObject = cameraStream;
+    cameraModal.classList.add('show');
+  }catch(err){
+    showToast(t('Camera unavailable — choose a photo instead', 'کیمرہ دستیاب نہیں — براہ کرم تصویر منتخب کریں'));
+    fallbackInput.click();
+  }
+}
+function closeCamera(){
+  if(cameraStream){ cameraStream.getTracks().forEach(track => track.stop()); cameraStream = null; }
+  cameraVideo.srcObject = null;
+  cameraModal.classList.remove('show');
+}
+function capturePhoto(){
+  const w = cameraVideo.videoWidth, h = cameraVideo.videoHeight;
+  if(!w || !h) return;
+  cameraCanvas.width = w;
+  cameraCanvas.height = h;
+  const ctx = cameraCanvas.getContext('2d');
+  // Undo the mirrored preview so the captured photo reads correctly.
+  ctx.translate(w, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(cameraVideo, 0, 0, w, h);
+  setAvatarImage(cameraCanvas.toDataURL('image/png'));
+  closeCamera();
+}
+document.getElementById('cameraCaptureBtn').addEventListener('click', capturePhoto);
+document.getElementById('cameraCancelBtn').addEventListener('click', closeCamera);
+cameraModal.addEventListener('click', (e) => { if(e.target === cameraModal) closeCamera(); });
+
+document.getElementById('cameraBtn').addEventListener('click', () => openCamera(document.getElementById('cameraInput')));
+document.getElementById('cameraInput').addEventListener('change', (e) => handlePhotoFile(e.target.files[0]));
+document.getElementById('settingsCameraBtn').addEventListener('click', () => openCamera(document.getElementById('settingsCameraInput')));
+document.getElementById('settingsCameraInput').addEventListener('change', (e) => handlePhotoFile(e.target.files[0]));
+
+// ===================== SETTINGS: EDIT NAME =====================
+function applyNameChange(name){
+  currentUserName = name;
+  updateGreeting();
+  const navPic = document.querySelector('.nav-profile .pic');
+  if(navPic && !navPic.querySelector('img')) navPic.textContent = name.charAt(0).toUpperCase();
+}
+document.getElementById('settingsSaveNameBtn').addEventListener('click', () => {
+  const input = document.getElementById('settingsNameInput');
+  const name = input.value.trim();
+  if(!name){
+    input.classList.add('error');
+    input.focus();
+    return;
+  }
+  input.classList.remove('error');
+  applyNameChange(name);
+  showToast(t('Name updated', 'نام تبدیل ہو گیا'));
+});
+document.getElementById('settingsNameInput').addEventListener('input', (e) => {
+  if(e.target.value.trim()) e.target.classList.remove('error');
+});
 
 const icons = {
-    entryTest: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
-    scholarship: '<circle cx="12" cy="8" r="6"/><path d="M9.7 13.5 8 22l4-2 4 2-1.7-8.5"/>',
-    vouchers: '<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>',
-    admissions: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+    entryTest: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8.5 12l2.2 2.2L16 9"/><line x1="8" y1="7" x2="16" y2="7"/>',
+    scholarship: '<path d="M2 9 12 4l10 5-10 5L2 9Z"/><path d="M6 11.2V16c0 1.4 2.7 2.8 6 2.8s6-1.4 6-2.8v-4.8"/><path d="M22 9v6.5"/>',
+    vouchers: '<path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4Z"/><line x1="10" y1="6" x2="10" y2="18" stroke-dasharray="2.4 2.4"/>',
+    admissions: '<path d="M12 6.2c-2-1.4-4.8-1.9-8-1.2v13c3.2-.7 6-.2 8 1.2 2-1.4 4.8-1.9 8-1.2V5c-3.2-.7-6-.2-8 1.2Z"/><line x1="12" y1="6.2" x2="12" y2="19.2"/>',
     timetable: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
     studentCard: '<rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2"/><line x1="14" y1="10" x2="18" y2="10"/><line x1="14" y1="14" x2="18" y2="14"/>',
-    societies: '<circle cx="12" cy="12" r="3"/><circle cx="12" cy="4" r="1.6"/><circle cx="20" cy="9" r="1.6"/><circle cx="17" cy="19" r="1.6"/><circle cx="7" cy="19" r="1.6"/><circle cx="4" cy="9" r="1.6"/>',
-    courses: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+    societies: '<circle cx="8.5" cy="8" r="3.2"/><path d="M2.5 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M15.2 13.5c2.7.2 4.8 2.5 4.8 5.3"/>',
+    courses: '<rect x="5" y="3" width="14" height="18" rx="2"/><line x1="5" y1="8" x2="19" y2="8"/><line x1="9" y1="3" x2="9" y2="8"/>',
     vehicle: '<path d="M5 17h14M5 17a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm14 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM3 17V9l2-5h14l2 5v8"/>',
-    rollNo: '<path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>',
-    clearance: '<path d="M9 11l3 3L22 4"/><rect x="3" y="4" width="14" height="17" rx="2"/>',
-    documents: '<path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/>',
+    rollNo: '<rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 3V2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="15" y2="14"/><line x1="9" y1="17.5" x2="13" y2="17.5"/>',
+    clearance: '<path d="M12 2.5 5 5.3v5.8c0 4.7 3 8.6 7 9.9 4-1.3 7-5.2 7-9.9V5.3Z"/><path d="M9 12l2 2 4-4.5"/>',
+    documents: '<path d="M3.5 7a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2Z"/>',
     liveChat: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/>',
     announcement: '<path d="M3 11v3a1 1 0 0 0 1 1h2l3.5 4V6L6 10H4a1 1 0 0 0-1 1Z"/><path d="M15 8a4 4 0 0 1 0 8"/><path d="M18 5a8 8 0 0 1 0 14"/>',
     hostel: '<path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/>',
     downloads: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
     email: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/>',
     contact: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>',
-    repeatCourse: '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>',
-    hostelItems: '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>'
+    repeatCourse: '<path d="M17 2.5 21 6.5 17 10.5"/><path d="M3 12v-1.5A4 4 0 0 1 7 6.5h14"/><path d="M7 21.5 3 17.5 7 13.5"/><path d="M21 12v1.5a4 4 0 0 1-4 4H3"/>',
+    library: '<path d="M4 21V4a1 1 0 0 1 1-1h2.5v18"/><path d="M10.5 21V5.5a1 1 0 0 1 1-1H14a1 1 0 0 1 1 1V21"/><path d="M18 21V10a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v11"/>'
   };
+
 
   // Real IUB portal destinations (ported from the IUB Portals Android app)
   const quickLinks = [
@@ -127,13 +219,13 @@ const icons = {
     { key:'clearance', label:'My Clearance', labelUr:'میری کلیئرنس', url:'https://my.iub.edu.pk/cms/clearance', extra:true },
     { key:'documents', label:'My Documents', labelUr:'میرے دستاویزات', url:'https://my.iub.edu.pk/cms/cms/std_documents', extra:true },
     { key:'liveChat', label:'Live Chat', labelUr:'لائیو چیٹ', url:'https://salmanadeeb.wixsite.com/livechat', extra:true },
-    { key:'announcement', label:'Announcement', labelUr:'اعلانات', url:'https://www.iub.edu.pk/news-update', extra:true },
+    { key:'announcement', label:'Announcement', labelUr:'اعلانات', url:'https://whatsapp.com/channel/0029VaF6qjjJZg44rpOzhf1O', extra:true, external:true },
     { key:'hostel', label:'Hostel', labelUr:'ہاسٹل', url:'https://eportal.iub.edu.pk/eportal/hostelportal', extra:true },
     { key:'downloads', label:'Download Forms', labelUr:'فارم ڈاؤن لوڈ کریں', url:'https://www.iub.edu.pk/downloads', extra:true },
     { key:'email', label:'IUB Email', labelUr:'آئی یو بی ای میل', url:'https://mail.google.com/a/iub.edu.pk', extra:true },
     { key:'contact', label:'Contact', labelUr:'رابطہ کریں', url:'https://www.iub.edu.pk/contact', extra:true },
     { key:'repeatCourse', label:'Repeat Course', labelUr:'دوبارہ کورس', url:'https://my.iub.edu.pk/academics/student/enrollment/course_repeat_challan', extra:true },
-    { key:'hostelItems', label:'Hostel Items', labelUr:'ہاسٹل کا سامان', url:'https://drive.google.com/file/d/1bezTSeYr4f6TmPcD84SXtRf1v3IS-dfP/view', extra:true },
+    { key:'library', label:'Library', labelUr:'لائبریری', url:'https://library.iub.edu.pk/', extra:true },
   ];
 
   const banners = [
@@ -157,7 +249,13 @@ const icons = {
       <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${icons[item.key]}</svg></span>
       <span class="lbl" data-en="${item.label}" data-ur="${item.labelUr}">${item.label}</span>
     `;
-    el.addEventListener('click', () => openPortal(el.querySelector('.lbl').textContent, item.url));
+    el.addEventListener('click', () => {
+      if(item.external){
+        window.open(item.url, '_blank', 'noopener');
+      } else {
+        openPortal(el.querySelector('.lbl').textContent, item.url);
+      }
+    });
     quickGrid.appendChild(el);
   });
 
@@ -239,18 +337,28 @@ const icons = {
   });
 
   const modal = document.getElementById('settingsModal');
-  document.getElementById('settingsBtn').addEventListener('click', () => modal.classList.add('show'));
+  function openSettings(){
+    document.getElementById('settingsNameInput').value = currentUserName;
+    modal.classList.add('show');
+  }
+  document.getElementById('settingsBtn').addEventListener('click', openSettings);
   document.getElementById('sidebarSettingsLink').addEventListener('click', (e) => {
     setActiveSidebarLink(e.currentTarget);
     closeSidebar();
-    modal.classList.add('show');
+    openSettings();
   });
   document.getElementById('closeSettings').addEventListener('click', () => modal.classList.remove('show'));
   modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('show'); });
 
+  document.getElementById('sidebarHelpBtn').addEventListener('click', () => {
+    closeSidebar();
+    const item = quickLinks.find(q => q.key === 'contact');
+    if(item) openPortal(item.label, item.url);
+  });
+
   // ===================== BELL / NOTIFICATIONS =====================
   document.getElementById('notifBtn').addEventListener('click', () => {
-    window.open('https://www.iub.edu.pk/news-update', '_blank', 'noopener');
+    window.open('https://whatsapp.com/channel/0029VaF6qjjJZg44rpOzhf1O', '_blank', 'noopener');
   });
 
   // ===================== SETTINGS: CHANGE MODE (NIGHT/DAY) =====================
@@ -298,11 +406,15 @@ const icons = {
   try{ savedLang = localStorage.getItem('iub-lang') || 'en'; }catch(e){}
   applyLanguage(savedLang);
 
+  // Re-check the time-of-day greeting every few minutes in case the tab
+  // stays open across a morning/afternoon/evening/night boundary.
+  setInterval(updateGreeting, 5 * 60 * 1000);
+
   // ===================== SETTINGS: SIGN OUT =====================
   document.getElementById('signOutRow').addEventListener('click', () => {
     modal.classList.remove('show');
     document.getElementById('usernameInput').value = '';
-    avatarCircle.innerHTML = defaultAvatarHTML;
+    resetAvatarImage();
     currentUserName = '';
     const navPic = document.querySelector('.nav-profile .pic');
     updateGreeting();
@@ -375,9 +487,9 @@ const icons = {
   portalModal.addEventListener('click', (e) => { if(e.target === portalModal) document.getElementById('closePortal').click(); });
 
   // Top shortcut row — EPortal / MyIUB / LMS
-  document.getElementById('scEportal').addEventListener('click', () => openPortal('EPortal', 'https://eportal.iub.edu.pk'));
-  document.getElementById('scMyiub').addEventListener('click', () => openPortal('MyIUB', 'https://my.iub.edu.pk/cms'));
-  document.getElementById('scLms').addEventListener('click', () => openPortal('LMS', 'https://lms.iub.edu.pk/my/'));
+  document.getElementById('scEportal').addEventListener('click', (e) => openPortal(e.currentTarget.textContent, 'https://eportal.iub.edu.pk'));
+  document.getElementById('scMyiub').addEventListener('click', (e) => openPortal(e.currentTarget.textContent, 'https://my.iub.edu.pk/cms'));
+  document.getElementById('scLms').addEventListener('click', (e) => openPortal(e.currentTarget.textContent, 'https://lms.iub.edu.pk/my/'));
 
   // Banner is clickable — opens whichever slide is currently showing
   bannerEl.style.cursor = 'pointer';

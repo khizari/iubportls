@@ -138,6 +138,45 @@
   .side-link.active{ background: var(--navy); color: var(--gold); }
   .side-link svg{ flex-shrink:0; }
 
+  .sidebar-footer{ margin-top:auto; padding-top: 18px; }
+  .sidebar-footer-card{
+    background: linear-gradient(160deg, var(--navy) 0%, #0e1a3d 100%);
+    border-radius: var(--radius-lg);
+    padding: 18px 16px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .sidebar-footer-card::before{
+    content:"";
+    position:absolute; top:-30px; right:-30px;
+    width:90px; height:90px; border-radius:50%;
+    background: rgba(240,180,41,0.14);
+  }
+  .sfc-icon{
+    color: var(--gold);
+    background: rgba(240,180,41,0.14);
+    width:44px; height:44px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    margin: 0 auto 10px;
+    position:relative;
+  }
+  .sfc-title{ color:#fff; font-size:13.5px; font-weight:700; margin-bottom:4px; position:relative; }
+  .sfc-sub{ color: rgba(255,255,255,0.65); font-size:11.5px; line-height:1.4; margin-bottom:14px; position:relative; }
+  .sfc-btn{
+    background: var(--gold);
+    color: var(--navy);
+    border:none;
+    font-size:12.5px; font-weight:700;
+    padding: 9px 14px;
+    border-radius: var(--radius-pill);
+    width:100%;
+    cursor:pointer;
+    position:relative;
+    transition: filter .12s ease;
+  }
+  .sfc-btn:hover{ filter: brightness(1.08); }
+
   /* ===================== MAIN ===================== */
   .main{
     flex:1;
@@ -207,7 +246,14 @@
   .quick-item .ic{
     width: 42px; height:42px; border-radius: 11px;
     background: var(--gold-soft);
+    border: 1px solid rgba(240,180,41,0.35);
     display:flex; align-items:center; justify-content:center;
+    color: var(--navy);
+    transition: background .12s ease, border-color .12s ease;
+  }
+  .quick-item:hover .ic{
+    background: var(--gold);
+    border-color: var(--gold);
     color: var(--navy);
   }
   .quick-item .lbl{ font-size: 13.5px; font-weight:700; color: var(--navy); }
@@ -279,6 +325,16 @@
   }
   .settings-overlay.show .settings-panel{ right:0; }
   .settings-panel h3{ font-size: 20px; font-weight:800; color: var(--navy); margin-bottom: 22px; }
+  .settings-profile-edit{
+    padding-bottom: 18px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid rgba(22,35,79,0.1);
+  }
+  .settings-profile-edit .auth-label:first-child{ margin-top:0; }
+  .settings-profile-edit .photo-row{ margin-bottom: 14px; flex-wrap: wrap; row-gap: 10px; }
+  .name-edit-row{ display:flex; align-items:center; gap:8px; }
+  .name-edit-row .input-pill{ flex:1; margin:0; }
+  .name-edit-row .btn-navy{ white-space:nowrap; }
   .modal-row{
     display:flex; align-items:center; justify-content:space-between;
     padding: 15px 0;
@@ -287,6 +343,7 @@
   .modal-row .label{ font-size: 14px; font-weight:600; color: var(--navy); }
   .modal-row .value{ font-size: 13px; font-weight:700; color: var(--navy); }
   .modal-row.danger .label{ color:#B4232C; }
+  .modal-row.danger{ cursor:pointer; }
   .mode-control{ display:flex; align-items:center; gap:10px; }
   .toggle{
     width: 52px; height: 28px;
@@ -336,6 +393,34 @@
   .app-version{ text-align:center; margin-top: 16px; font-size: 12px; color: var(--navy); opacity:.7; }
 
   /* ===================== PORTAL VIEWER (in-app browser) ===================== */
+  .camera-overlay{
+    position: fixed; inset:0;
+    background: rgba(10,14,30,0.75);
+    display:none;
+    z-index: 70;
+    align-items:center; justify-content:center;
+  }
+  .camera-overlay.show{ display:flex; }
+  .camera-panel{
+    width: min(480px, 92vw);
+    background: var(--card);
+    border-radius: var(--radius-lg);
+    overflow:hidden;
+    box-shadow: 0 30px 70px -20px rgba(0,0,0,0.5);
+    padding: 14px;
+  }
+  .camera-panel video{
+    width:100%; max-height: 60vh;
+    border-radius: 12px;
+    background:#000;
+    display:block;
+    transform: scaleX(-1);
+  }
+  .camera-actions{
+    display:flex; gap:10px; margin-top:14px;
+  }
+  .camera-actions button{ flex:1; }
+
   .portal-overlay{
     position: fixed; inset:0;
     background: rgba(10,14,30,0.55);
