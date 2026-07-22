@@ -21,36 +21,36 @@
       <div class="split-deco d2"></div>
       <div class="split-brand-content">
         <div class="auth-mark"><img src="assets/logo.png" alt="IUB logo"></div>
-        <h1>All In One Portal</h1>
-        <p>Admissions, results, fee vouchers, timetables, and every other university service — in a single sign-in.</p>
+        <h1 data-en="All In One Portal" data-ur="آل اِن ون پورٹل">All In One Portal</h1>
+        <p data-en="Admissions, results, fee vouchers, timetables, and every other university service — in a single sign-in." data-ur="داخلے، نتائج، فیس واؤچرز، ٹائم ٹیبل، اور یونیورسٹی کی ہر دوسری سروس — ایک ہی سائن اِن میں۔">Admissions, results, fee vouchers, timetables, and every other university service — in a single sign-in.</p>
         <div class="split-stats">
-          <div><strong>14</strong><span>services</span></div>
-          <div><strong>1</strong><span>login</span></div>
-          <div><strong>24/7</strong><span>access</span></div>
+          <div><strong>14</strong><span data-en="services" data-ur="سروسز">services</span></div>
+          <div><strong>1</strong><span data-en="login" data-ur="لاگ اِن">login</span></div>
+          <div><strong>24/7</strong><span data-en="access" data-ur="رسائی">access</span></div>
         </div>
       </div>
     </div>
     <div class="split-form">
       <div class="split-form-inner">
-        <h2>Sign in</h2>
-        <p class="form-sub">Use your student profile to continue.</p>
+        <h2 data-en="Sign in" data-ur="سائن اِن کریں">Sign in</h2>
+        <p class="form-sub" data-en="Use your student profile to continue." data-ur="جاری رکھنے کے لیے اپنا اسٹوڈنٹ پروفائل استعمال کریں۔">Use your student profile to continue.</p>
 
-        <label class="auth-label">Profile photo</label>
+        <label class="auth-label" data-en="Profile photo" data-ur="پروفائل فوٹو">Profile photo</label>
         <div class="photo-row">
           <div class="avatar-circle-sm">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg>
           </div>
-          <button class="btn-navy" id="cameraBtn">Camera</button>
-          <button class="btn-light" id="browseBtn">Browse Files</button>
+          <button class="btn-navy" id="cameraBtn" data-en="Camera" data-ur="کیمرہ">Camera</button>
+          <button class="btn-light" id="browseBtn" data-en="Browse Files" data-ur="فائلیں براؤز کریں">Browse Files</button>
           <input type="file" id="cameraInput" accept="image/*" capture="user" style="display:none">
           <input type="file" id="browseInput" accept="image/*" style="display:none">
         </div>
 
-        <label class="auth-label">Username</label>
-        <input class="input-pill" id="usernameInput" type="text" placeholder="e.g. ahmad.raza">
-        <p class="field-error" id="usernameError">Please enter your username to continue.</p>
+        <label class="auth-label" data-en="Username" data-ur="یوزر نیم">Username</label>
+        <input class="input-pill" id="usernameInput" type="text" placeholder="e.g. ahmad.raza" data-en-placeholder="e.g. ahmad.raza" data-ur-placeholder="مثال: ahmad.raza">
+        <p class="field-error" id="usernameError" data-en="Please enter your username to continue." data-ur="جاری رکھنے کے لیے براہ کرم اپنا یوزر نیم درج کریں۔">Please enter your username to continue.</p>
 
-        <button class="login-submit" id="loginBtn">Login</button>
+        <button class="login-submit" id="loginBtn" data-en="Login" data-ur="لاگ اِن">Login</button>
       </div>
     </div>
   </div>
@@ -200,13 +200,6 @@
           <h2 id="bannerText">ADMISSION<br>LAST DATE</h2>
           <div class="banner-dots" id="bannerDots"></div>
         </div>
-        <div class="side-card">
-          <div>
-            <h4>Complete your profile</h4>
-            <p>Add a profile photo and confirm your username to personalize your portal.</p>
-          </div>
-          <button class="cta" id="profileCta">Add Photo</button>
-        </div>
       </div>
 
       <div class="section-head">
@@ -239,14 +232,21 @@
       <h3 data-en="Settings" data-ur="ترتیبات">Settings</h3>
       <div class="modal-row">
         <span class="label" data-en="Change Mode" data-ur="موڈ تبدیل کریں">Change Mode</span>
-        <div class="toggle" id="modeToggle">
-          <span class="txt">NIGHT MODE</span>
-          <div class="knob">🌙</div>
+        <div class="mode-control">
+          <span class="value" id="modeValue">Day Mode</span>
+          <div class="toggle" id="modeToggle">
+            <span class="toggle-icon toggle-icon-sun">☀️</span>
+            <span class="toggle-icon toggle-icon-moon">🌙</span>
+            <div class="knob"></div>
+          </div>
         </div>
       </div>
       <div class="modal-row" id="languageRow">
         <span class="label" data-en="Change Language" data-ur="زبان تبدیل کریں">Change Language</span>
-        <span class="value" id="languageValue">English</span>
+        <select class="lang-select" id="languageSelect">
+          <option value="en">English</option>
+          <option value="ur">اردو (Urdu)</option>
+        </select>
       </div>
       <div class="modal-row danger" id="signOutRow">
         <span class="label" data-en="Sign Out" data-ur="سائن آؤٹ">Sign Out</span>

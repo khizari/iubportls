@@ -29,11 +29,8 @@ const ALLOWED_HOSTS = [
 
 // Disable Vercel's automatic body parsing so we can read+forward the raw
 // request body untouched (needed for login POSTs, file uploads, etc).
-module.exports.config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// NOTE: this must be attached to module.exports AFTER the handler function
+// is assigned below — attaching it here would get wiped out.
 
 function cookieNameFor(hostname) {
   return 'iub_sess_' + hostname.replace(/[^a-z0-9]/gi, '_');
@@ -95,6 +92,60 @@ async function readRawBody(req) {
   const chunks = [];
   for await (const chunk of req) chunks.push(chunk);
   return Buffer.concat(chunks);
+}
+
+function buildShimScript(targetHref) {
+  // Injected into every proxied page. Static href/src/action attributes are
+  // already rewritten server-side above, but a lot of modern widgets
+  // (captchas, AJAX login checks, SPA routers) build request URLs at
+  // runtime in JavaScript instead. Those never touch our regex rewrite, so
+  // without this shim they'd fire straight at "our" origin instead of
+  // IUB's — which is exactly why things like captcha verification were
+  // failing. This patches fetch/XHR (and stray link clicks) to resolve
+  // against the *real* page URL and route through the proxy, same as
+  // everything else.
+  return `<script>(function(){
+  var __BASE__ = ${JSON.stringify(targetHref)};
+  var __PREFIX__ = '/api/proxy?url=';
+  function toProxied(url) {
+    if (typeof url !== 'string' || !url) return url;
+    if (url.indexOf(__PREFIX__) !== -1) return url;
+    if (/^(data:|blob:|javascript:|mailto:|tel:|#)/i.test(url)) return url;
+    var abs;
+    try { abs = new URL(url, __BASE__).href; } catch (e) { return url; }
+    return __PREFIX__ + encodeURIComponent(abs);
+  }
+  if (window.fetch) {
+    var _fetch = window.fetch;
+    window.fetch = function(input, init) {
+      try {
+        if (typeof input === 'string') {
+          input = toProxied(input);
+        } else if (input && typeof input.url === 'string') {
+          input = new Request(toProxied(input.url), input);
+        }
+      } catch (e) {}
+      return _fetch.call(this, input, init);
+    };
+  }
+  var _open = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function(method, url) {
+    var args = Array.prototype.slice.call(arguments);
+    try { args[1] = toProxied(url); } catch (e) {}
+    return _open.apply(this, args);
+  };
+  // Dynamically-inserted links (added by JS after the page loaded) never
+  // went through the server-side rewrite either — catch them at click time.
+  document.addEventListener('click', function(e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+    if (!a) return;
+    var href = a.getAttribute('href');
+    if (!href || href.indexOf(__PREFIX__) !== -1) return;
+    if (/^(#|javascript:|mailto:|tel:)/i.test(href)) return;
+    e.preventDefault();
+    window.location.href = toProxied(href);
+  }, true);
+})();</script>`;
 }
 
 module.exports = async (req, res) => {
@@ -213,6 +264,16 @@ module.exports = async (req, res) => {
       }
     );
 
+    // Inject the fetch/XHR shim as early as possible (right after <head>)
+    // so it's active before the page's own scripts — including any
+    // captcha/login widgets — start making requests.
+    const shim = buildShimScript(targetUrl.toString());
+    if (/<head[^>]*>/i.test(html)) {
+      html = html.replace(/<head[^>]*>/i, (match) => match + shim);
+    } else {
+      html = shim + html;
+    }
+
     res.send(html);
     return;
   }
@@ -220,4 +281,12 @@ module.exports = async (req, res) => {
   // Non-HTML (images, CSS, JS, fonts, etc.) — pass through unchanged
   const buffer = Buffer.from(await upstreamResp.arrayBuffer());
   res.send(buffer);
+};
+
+// Disable Vercel's automatic body parsing so we can read+forward the raw
+// request body untouched (needed for login POSTs, file uploads, etc).
+module.exports.config = {
+  api: {
+    bodyParser: false,
+  },
 };

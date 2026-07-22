@@ -3,18 +3,36 @@ const loginScreen = document.getElementById('loginScreen');
 const welcomeScreen = document.getElementById('welcomeScreen');
 const dashboardScreen = document.getElementById('dashboardScreen');
 
+// Shared language state — read by anything rendered/updated via JS (as
+// opposed to the static data-en/data-ur attributes the DOM handles on its
+// own). Kept in sync by applyLanguage() further down.
+let currentLang = 'en';
+let currentUserName = '';
+function t(en, ur){ return currentLang === 'ur' ? ur : en; }
+
 function goToWelcome(name){
-  document.getElementById('welcomeGreeting').textContent = 'Welcome, ' + name + ' 👋';
+  document.getElementById('welcomeGreeting').textContent = t('Welcome, ', 'خوش آمدید، ') + name + ' 👋';
   loginScreen.style.display = 'none';
   welcomeScreen.style.display = 'flex';
+}
+
+function updateGreeting(){
+  const navTxt = document.querySelector('.nav-profile .txt');
+  if(!navTxt) return;
+  if(currentUserName){
+    navTxt.innerHTML = t('Hi ', '') + currentUserName + (currentLang === 'ur' ? '،' : ',') +
+      '<small>' + t('Good Morning', 'صبح بخیر') + '</small>';
+  } else {
+    navTxt.innerHTML = t('Hi,', '') + '<small>' + t('Good Morning', 'صبح بخیر') + '</small>';
+  }
 }
 
 function goToDashboard(name){
   welcomeScreen.style.display = 'none';
   dashboardScreen.style.display = 'block';
-  const navTxt = document.querySelector('.nav-profile .txt');
+  currentUserName = name;
   const navPic = document.querySelector('.nav-profile .pic');
-  if(navTxt) navTxt.innerHTML = 'Hi ' + name + ',<small>Good Morning</small>';
+  updateGreeting();
   if(navPic && !navPic.querySelector('img')) navPic.textContent = name.charAt(0).toUpperCase();
 }
 
@@ -96,59 +114,65 @@ const icons = {
 
   // Real IUB portal destinations (ported from the IUB Portals Android app)
   const quickLinks = [
-    { key:'entryTest', label:'Entry Test', url:'https://eportal.iub.edu.pk/eportal/its' },
-    { key:'scholarship', label:'Scholarships', url:'https://my.iub.edu.pk/scholarship/apply' },
-    { key:'vouchers', label:'Vouchers', url:'https://my.iub.edu.pk/academics/student/finance/my_vouchers' },
-    { key:'admissions', label:'Admissions', url:'https://eportal.iub.edu.pk/eportal/admissions' },
-    { key:'timetable', label:'Time Table', url:'https://my.iub.edu.pk/timetable/publics' },
-    { key:'studentCard', label:'Student Card', url:'https://my.iub.edu.pk/cba/student/student_card' },
-    { key:'societies', label:'Societies', url:'https://my.iub.edu.pk/dsa/student/application#step-1' },
-    { key:'courses', label:'Short Courses', url:'https://eportal.iub.edu.pk/short_courses/std/students/apply' },
-    { key:'vehicle', label:'Vehicle Entry', url:'https://my.iub.edu.pk/security/vehicle', extra:true },
-    { key:'rollNo', label:'Roll No Slips', url:'https://my.iub.edu.pk/cms/student_survey', extra:true },
-    { key:'clearance', label:'My Clearance', url:'https://my.iub.edu.pk/cms/clearance', extra:true },
-    { key:'documents', label:'My Documents', url:'https://my.iub.edu.pk/cms/cms/std_documents', extra:true },
-    { key:'liveChat', label:'Live Chat', url:'https://salmanadeeb.wixsite.com/livechat', extra:true },
-    { key:'announcement', label:'Announcement', url:'https://www.iub.edu.pk/news-update', extra:true },
-    { key:'hostel', label:'Hostel', url:'https://eportal.iub.edu.pk/eportal/hostelportal', extra:true },
-    { key:'downloads', label:'Download Forms', url:'https://www.iub.edu.pk/downloads', extra:true },
-    { key:'email', label:'IUB Email', url:'https://mail.google.com/a/iub.edu.pk', extra:true },
-    { key:'contact', label:'Contact', url:'https://www.iub.edu.pk/contact', extra:true },
-    { key:'repeatCourse', label:'Repeat Course', url:'https://my.iub.edu.pk/academics/student/enrollment/course_repeat_challan', extra:true },
-    { key:'hostelItems', label:'Hostel Items', url:'https://drive.google.com/file/d/1bezTSeYr4f6TmPcD84SXtRf1v3IS-dfP/view', extra:true },
+    { key:'entryTest', label:'Entry Test', labelUr:'انٹری ٹیسٹ', url:'https://eportal.iub.edu.pk/eportal/its' },
+    { key:'scholarship', label:'Scholarships', labelUr:'وظائف', url:'https://my.iub.edu.pk/scholarship/apply' },
+    { key:'vouchers', label:'Vouchers', labelUr:'واؤچرز', url:'https://my.iub.edu.pk/academics/student/finance/my_vouchers' },
+    { key:'admissions', label:'Admissions', labelUr:'داخلے', url:'https://eportal.iub.edu.pk/eportal/admissions' },
+    { key:'timetable', label:'Time Table', labelUr:'ٹائم ٹیبل', url:'https://my.iub.edu.pk/timetable/publics' },
+    { key:'studentCard', label:'Student Card', labelUr:'اسٹوڈنٹ کارڈ', url:'https://my.iub.edu.pk/cba/student/student_card' },
+    { key:'societies', label:'Societies', labelUr:'سوسائٹیز', url:'https://my.iub.edu.pk/dsa/student/application#step-1' },
+    { key:'courses', label:'Short Courses', labelUr:'مختصر کورسز', url:'https://eportal.iub.edu.pk/short_courses/std/students/apply' },
+    { key:'vehicle', label:'Vehicle Entry', labelUr:'گاڑی کا اندراج', url:'https://my.iub.edu.pk/security/vehicle', extra:true },
+    { key:'rollNo', label:'Roll No Slips', labelUr:'رول نمبر سلپ', url:'https://my.iub.edu.pk/cms/student_survey', extra:true },
+    { key:'clearance', label:'My Clearance', labelUr:'میری کلیئرنس', url:'https://my.iub.edu.pk/cms/clearance', extra:true },
+    { key:'documents', label:'My Documents', labelUr:'میرے دستاویزات', url:'https://my.iub.edu.pk/cms/cms/std_documents', extra:true },
+    { key:'liveChat', label:'Live Chat', labelUr:'لائیو چیٹ', url:'https://salmanadeeb.wixsite.com/livechat', extra:true },
+    { key:'announcement', label:'Announcement', labelUr:'اعلانات', url:'https://www.iub.edu.pk/news-update', extra:true },
+    { key:'hostel', label:'Hostel', labelUr:'ہاسٹل', url:'https://eportal.iub.edu.pk/eportal/hostelportal', extra:true },
+    { key:'downloads', label:'Download Forms', labelUr:'فارم ڈاؤن لوڈ کریں', url:'https://www.iub.edu.pk/downloads', extra:true },
+    { key:'email', label:'IUB Email', labelUr:'آئی یو بی ای میل', url:'https://mail.google.com/a/iub.edu.pk', extra:true },
+    { key:'contact', label:'Contact', labelUr:'رابطہ کریں', url:'https://www.iub.edu.pk/contact', extra:true },
+    { key:'repeatCourse', label:'Repeat Course', labelUr:'دوبارہ کورس', url:'https://my.iub.edu.pk/academics/student/enrollment/course_repeat_challan', extra:true },
+    { key:'hostelItems', label:'Hostel Items', labelUr:'ہاسٹل کا سامان', url:'https://drive.google.com/file/d/1bezTSeYr4f6TmPcD84SXtRf1v3IS-dfP/view', extra:true },
   ];
 
   const banners = [
-    { text: 'ADMISSION<br>LAST DATE', bg: 'linear-gradient(120deg, #16234F 0%, #2C3E7A 100%)', url:'https://www.iub.edu.pk/admissions' },
-    { text: 'FEE<br>STRUCTURE', bg: 'linear-gradient(120deg, #F0B429 0%, #C98F14 100%)', url:'https://www.iub.edu.pk/fee-structure' },
-    { text: 'MERIT<br>LIST', bg: 'linear-gradient(120deg, #16234F 0%, #0D163A 100%)', url:'https://eportal.iub.edu.pk/meritlists/index.php?p=' },
-    { text: 'TRANSPORT<br>SCHEDULE', bg: 'linear-gradient(120deg, #F0B429 0%, #C98F14 100%)', url:'https://drive.google.com/file/d/1Cte7DZAqOdvqTKsnzE8nQJPbgL2jFs3r/view?usp=sharing' },
+    { text: 'ADMISSION<br>LAST DATE', textUr: 'داخلے کی<br>آخری تاریخ', image: 'assets/admission-last-date.jpg', url:'https://www.iub.edu.pk/admissions' },
+    { text: 'FEE<br>STRUCTURE', textUr: 'فیس کا<br>ڈھانچہ', image: 'assets/fee-structure.jpg', url:'https://www.iub.edu.pk/fee-structure' },
+    { text: 'MERIT<br>LIST', textUr: 'میرٹ<br>لسٹ', image: 'assets/merit-list.jpg', url:'https://eportal.iub.edu.pk/meritlists/index.php?p=' },
+    { text: 'TRANSPORT<br>SCHEDULE', textUr: 'ٹرانسپورٹ کا<br>شیڈول', image: 'assets/transport-schedule.jpg', url:'https://drive.google.com/file/d/1Cte7DZAqOdvqTKsnzE8nQJPbgL2jFs3r/view?usp=sharing' },
   ];
 
   const quickGrid = document.getElementById('quickGrid');
   const quickLinkCount = document.getElementById('quickLinkCount');
-  if (quickLinkCount) quickLinkCount.textContent = quickLinks.length + ' services';
+  function updateServicesCount(){
+    if (quickLinkCount) quickLinkCount.textContent = t(quickLinks.length + ' services', quickLinks.length + ' سروسز');
+  }
+  updateServicesCount();
 
   quickLinks.forEach(item => {
     const el = document.createElement('div');
     el.className = 'quick-item' + (item.extra ? ' hidden-extra' : '');
     el.innerHTML = `
       <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${icons[item.key]}</svg></span>
-      <span class="lbl">${item.label}</span>
+      <span class="lbl" data-en="${item.label}" data-ur="${item.labelUr}">${item.label}</span>
     `;
-    el.addEventListener('click', () => openPortal(item.label, item.url));
+    el.addEventListener('click', () => openPortal(el.querySelector('.lbl').textContent, item.url));
     quickGrid.appendChild(el);
   });
 
   const showMoreBtn = document.createElement('button');
   showMoreBtn.className = 'show-more-btn';
-  showMoreBtn.textContent = 'Show More';
-  quickGrid.appendChild(showMoreBtn);
+  function updateShowMoreLabel(){
+    showMoreBtn.textContent = expanded ? t('Show Less', 'کم دکھائیں') : t('Show More', 'مزید دکھائیں');
+  }
   let expanded = false;
+  updateShowMoreLabel();
+  quickGrid.appendChild(showMoreBtn);
   showMoreBtn.addEventListener('click', () => {
     expanded = !expanded;
     document.querySelectorAll('.hidden-extra').forEach(el => el.classList.toggle('show', expanded));
-    showMoreBtn.textContent = expanded ? 'Show Less' : 'Show More';
+    updateShowMoreLabel();
   });
 
   const bannerEl = document.getElementById('banner');
@@ -161,8 +185,9 @@ const icons = {
   });
   let bIndex = 0;
   function setBanner(i){
-    bannerEl.style.background = banners[i].bg;
-    bannerText.innerHTML = banners[i].text;
+    bannerEl.style.backgroundImage =
+      `linear-gradient(90deg, rgba(10,16,38,0.88) 0%, rgba(10,16,38,0.55) 45%, rgba(10,16,38,0.15) 100%), url("${banners[i].image}")`;
+    bannerText.innerHTML = t(banners[i].text, banners[i].textUr);
     [...dotsEl.children].forEach((d,idx) => d.className = idx===i ? 'active' : '');
   }
   setBanner(0);
@@ -222,7 +247,6 @@ const icons = {
   });
   document.getElementById('closeSettings').addEventListener('click', () => modal.classList.remove('show'));
   modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('show'); });
-  document.getElementById('profileCta').addEventListener('click', () => document.getElementById('browseInput').click());
 
   // ===================== BELL / NOTIFICATIONS =====================
   document.getElementById('notifBtn').addEventListener('click', () => {
@@ -231,13 +255,12 @@ const icons = {
 
   // ===================== SETTINGS: CHANGE MODE (NIGHT/DAY) =====================
   const modeToggle = document.getElementById('modeToggle');
-  const modeKnob = modeToggle.querySelector('.knob');
-  const modeTxt = modeToggle.querySelector('.txt');
+  const modeValue = document.getElementById('modeValue');
   function applyTheme(dark){
     document.body.classList.toggle('dark-mode', dark);
     modeToggle.classList.toggle('on', dark);
-    modeKnob.textContent = dark ? '☀️' : '🌙';
-    modeTxt.textContent = dark ? 'DAY MODE' : 'NIGHT MODE';
+    modeToggle.setAttribute('aria-checked', dark ? 'true' : 'false');
+    modeValue.textContent = t(dark ? 'Night Mode' : 'Day Mode', dark ? 'رات کا موڈ' : 'دن کا موڈ');
     try{ localStorage.setItem('iub-theme', dark ? 'dark' : 'light'); }catch(e){}
   }
   modeToggle.addEventListener('click', () => applyTheme(!document.body.classList.contains('dark-mode')));
@@ -246,24 +269,31 @@ const icons = {
   applyTheme(savedTheme === 'dark');
 
   // ===================== SETTINGS: CHANGE LANGUAGE (EN / UR) =====================
-  const languageRow = document.getElementById('languageRow');
-  const languageValue = document.getElementById('languageValue');
+  const languageSelect = document.getElementById('languageSelect');
   function applyLanguage(lang){
-    document.documentElement.lang = lang === 'ur' ? 'ur' : 'en';
-    document.body.classList.toggle('lang-ur', lang === 'ur');
+    currentLang = lang === 'ur' ? 'ur' : 'en';
+    document.documentElement.lang = currentLang;
+    document.body.classList.toggle('lang-ur', currentLang === 'ur');
     document.querySelectorAll('[data-en]').forEach(el => {
-      el.textContent = lang === 'ur' ? el.getAttribute('data-ur') : el.getAttribute('data-en');
+      el.textContent = currentLang === 'ur' ? el.getAttribute('data-ur') : el.getAttribute('data-en');
     });
     document.querySelectorAll('[data-en-placeholder]').forEach(el => {
-      el.placeholder = lang === 'ur' ? el.getAttribute('data-ur-placeholder') : el.getAttribute('data-en-placeholder');
+      el.placeholder = currentLang === 'ur' ? el.getAttribute('data-ur-placeholder') : el.getAttribute('data-en-placeholder');
     });
-    languageValue.textContent = lang === 'ur' ? 'اردو' : 'English';
+    languageSelect.value = currentLang;
+    // Refresh everything rendered/updated via JS (dynamic content the
+    // data-en/data-ur DOM scan above can't reach on its own).
+    updateGreeting();
+    updateServicesCount();
+    updateShowMoreLabel();
+    setBanner(bIndex);
+    modeValue.textContent = t(
+      document.body.classList.contains('dark-mode') ? 'Night Mode' : 'Day Mode',
+      document.body.classList.contains('dark-mode') ? 'رات کا موڈ' : 'دن کا موڈ'
+    );
     try{ localStorage.setItem('iub-lang', lang); }catch(e){}
   }
-  languageRow.addEventListener('click', () => {
-    const next = document.documentElement.lang === 'ur' ? 'en' : 'ur';
-    applyLanguage(next);
-  });
+  languageSelect.addEventListener('change', (e) => applyLanguage(e.target.value));
   let savedLang = 'en';
   try{ savedLang = localStorage.getItem('iub-lang') || 'en'; }catch(e){}
   applyLanguage(savedLang);
@@ -273,9 +303,9 @@ const icons = {
     modal.classList.remove('show');
     document.getElementById('usernameInput').value = '';
     avatarCircle.innerHTML = defaultAvatarHTML;
-    const navTxt = document.querySelector('.nav-profile .txt');
+    currentUserName = '';
     const navPic = document.querySelector('.nav-profile .pic');
-    if(navTxt) navTxt.innerHTML = 'Hi,<small>Good Morning</small>';
+    updateGreeting();
     if(navPic) navPic.textContent = '';
     dashboardScreen.style.display = 'none';
     welcomeScreen.style.display = 'none';

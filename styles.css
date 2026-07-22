@@ -147,7 +147,7 @@
 
   .banner-row{
     display:grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr;
     gap: 16px;
   }
   .banner{
@@ -157,7 +157,9 @@
     overflow:hidden;
     display:flex; align-items:center;
     padding: 0 34px;
-    transition: background .4s ease;
+    background-size: cover;
+    background-position: center;
+    transition: background-image .4s ease;
   }
   .banner h2{
     color:#fff; font-size: 34px; font-weight:800; line-height:1.15;
@@ -170,26 +172,7 @@
   .banner-dots span{ width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,0.5); }
   .banner-dots span.active{ background:#fff; width:20px; border-radius:4px; }
 
-  .side-card{
-    background: var(--navy);
-    border-radius: var(--radius-lg);
-    padding: 22px;
-    color:#fff;
-    display:flex; flex-direction:column; justify-content:space-between;
-  }
-  .side-card h4{ font-size: 15px; font-weight:700; margin-bottom:8px; }
-  .side-card p{ font-size: 12.5px; color:#B9C2D6; line-height:1.5; }
-  .side-card .cta{
-    margin-top: 14px;
-    background: var(--gold);
-    color: var(--navy);
-    font-weight:700; font-size: 12.5px;
-    padding: 10px 14px;
-    border-radius: var(--radius-pill);
-    border:none;
-    cursor:pointer;
-    align-self:flex-start;
-  }
+
 
   .section-head{
     display:flex; align-items:center; justify-content:space-between;
@@ -304,26 +287,42 @@
   .modal-row .label{ font-size: 14px; font-weight:600; color: var(--navy); }
   .modal-row .value{ font-size: 13px; font-weight:700; color: var(--navy); }
   .modal-row.danger .label{ color:#B4232C; }
+  .mode-control{ display:flex; align-items:center; gap:10px; }
   .toggle{
-    width: 78px; height: 32px;
-    background: #16151A;
+    width: 52px; height: 28px;
+    background: #d8dce6;
     border-radius: var(--radius-pill);
     display:flex; align-items:center;
     padding: 3px;
     cursor:pointer;
     position:relative;
+    transition: background .25s ease;
   }
+  .toggle.on{ background:#16151A; }
+  .toggle-icon{
+    position:absolute; top:50%; transform:translateY(-50%);
+    font-size: 12px; line-height:1; pointer-events:none;
+  }
+  .toggle-icon-sun{ left: 6px; }
+  .toggle-icon-moon{ right: 6px; }
   .toggle .knob{
-    width:26px; height:26px; border-radius:50%;
+    width:22px; height:22px; border-radius:50%;
     background:#fff;
-    margin-left:auto;
-    display:flex; align-items:center; justify-content:center;
-    font-size: 12px;
+    position:absolute; top:3px; left:3px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    transition: left .25s ease;
   }
-  .toggle .txt{
-    position:absolute; left:9px; top:50%; transform:translateY(-50%);
-    color:#fff; font-size:8.5px; font-weight:700; letter-spacing:.4px;
+  .toggle.on .knob{ left: 27px; }
+  .lang-select{
+    font-family:'Poppins', sans-serif;
+    font-size: 13px; font-weight:700; color: var(--navy);
+    background: #fff;
+    border: 1px solid rgba(22,35,79,0.18);
+    border-radius: var(--radius-pill);
+    padding: 7px 14px;
+    cursor:pointer;
   }
+  .lang-select:focus{ outline: 2px solid var(--gold); outline-offset:1px; }
   .close-settings{
     width:100%; margin-top: 24px;
     padding: 13px;
@@ -459,13 +458,17 @@
     .quick-grid{ grid-template-columns: repeat(3,1fr); }
     .banner-row{ grid-template-columns: 1fr; }
     .main{ padding: 20px 20px 60px; }
+    /* In Urdu (RTL), the off-canvas drawer should slide in from the right
+       instead of the left — but only while it's actually an off-canvas
+       drawer (this media query), never on desktop where the sidebar is a
+       normal in-flow column. */
+    body.lang-ur .sidebar{
+      left:auto; right:0;
+      transform: translateX(100%);
+      box-shadow: 0 0 40px rgba(0,0,0,0.25);
+    }
+    body.lang-ur .sidebar.show{ transform: translateX(0); }
   }
-  body.lang-ur .sidebar{
-    left:auto; right:0;
-    transform: translateX(100%);
-    box-shadow: 0 0 40px rgba(0,0,0,0.25);
-  }
-  body.lang-ur .sidebar.show{ transform: translateX(0); }
 
   /* Tablet portrait */
   @media (max-width: 768px){
@@ -498,7 +501,6 @@
     .quick-item{ padding: 14px 12px; }
     .banner{ height: 150px; padding: 0 18px; }
     .banner h2{ font-size: 22px; }
-    .side-card{ padding: 18px; }
     .split-brand-content h1{ font-size: 22px; }
     .split-stats{ gap: 20px; }
     .btn-navy, .btn-light{ padding: 9px 11px; font-size: 11.5px; }
@@ -663,8 +665,9 @@
   background: var(--gold-soft);
   color: var(--navy);
   display:flex; align-items:center; justify-content:center;
+  box-sizing:border-box; padding:0; line-height:0;
 }
-.wp-ic svg{ display:block; }
+.wp-ic svg{ display:block; width:18px; height:18px; margin:auto; }
 .wp-item strong{ display:block; font-size: 14px; color: var(--navy); }
 .wp-item span{ display:block; font-size: 12.5px; color: var(--text-muted); margin-top:2px; line-height:1.4; }
 
@@ -716,6 +719,10 @@ body.dark-mode .avatar-circle-sm{
 body.dark-mode .side-link.active{ color: var(--gold); }
 body.dark-mode .settings-panel{ background:#1b202e; }
 body.dark-mode .settings-panel .modal-row{ border-bottom-color: rgba(237,239,245,0.1); }
+body.dark-mode .lang-select{
+  background:#252c3d; color:#EDEFF5; border-color: rgba(237,239,245,0.18);
+}
+body.dark-mode .toggle{ background:#2b3245; }
 body.dark-mode .split-form,
 body.dark-mode .split-form-inner .input-pill,
 body.dark-mode .btn-light{ background:#1b202e; color:#EDEFF5; }
