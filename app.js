@@ -211,26 +211,31 @@ const icons = {
 
 
   // Real IUB portal destinations (ported from the IUB Portals Android app)
+  // `gated: true` = requires an IUB login; these navigate the browser
+  // straight to the real iub.edu.pk page (full page, same tab) instead of
+  // opening inside the embedded viewer, so login/CAPTCHA work normally and
+  // the session the student ends up with is a real IUB session in their
+  // own browser — not one held by this app.
   const quickLinks = [
-    { key:'entryTest', label:'Entry Test', labelUr:'انٹری ٹیسٹ', url:'https://eportal.iub.edu.pk/eportal/its' },
-    { key:'scholarship', label:'Scholarships', labelUr:'وظائف', url:'https://my.iub.edu.pk/scholarship/apply' },
-    { key:'vouchers', label:'Vouchers', labelUr:'واؤچرز', url:'https://my.iub.edu.pk/academics/student/finance/my_vouchers' },
+    { key:'entryTest', label:'Entry Test', labelUr:'انٹری ٹیسٹ', url:'https://eportal.iub.edu.pk/eportal/its', gated:true },
+    { key:'scholarship', label:'Scholarships', labelUr:'وظائف', url:'https://my.iub.edu.pk/scholarship/apply', gated:true },
+    { key:'vouchers', label:'Vouchers', labelUr:'واؤچرز', url:'https://my.iub.edu.pk/academics/student/finance/my_vouchers', gated:true },
     { key:'admissions', label:'Admissions', labelUr:'داخلے', url:'https://eportal.iub.edu.pk/eportal/admissions' },
-    { key:'timetable', label:'Time Table', labelUr:'ٹائم ٹیبل', url:'https://my.iub.edu.pk/timetable/publics' },
-    { key:'studentCard', label:'Student Card', labelUr:'اسٹوڈنٹ کارڈ', url:'https://my.iub.edu.pk/cba/student/student_card' },
-    { key:'societies', label:'Societies', labelUr:'سوسائٹیز', url:'https://my.iub.edu.pk/dsa/student/application#step-1' },
-    { key:'courses', label:'Short Courses', labelUr:'مختصر کورسز', url:'https://eportal.iub.edu.pk/short_courses/std/students/apply' },
-    { key:'vehicle', label:'Vehicle Entry', labelUr:'گاڑی کا اندراج', url:'https://my.iub.edu.pk/security/vehicle', extra:true },
-    { key:'rollNo', label:'Roll No Slips', labelUr:'رول نمبر سلپ', url:'https://my.iub.edu.pk/cms/student_survey', extra:true },
-    { key:'clearance', label:'My Clearance', labelUr:'میری کلیئرنس', url:'https://my.iub.edu.pk/cms/clearance', extra:true },
-    { key:'documents', label:'My Documents', labelUr:'میرے دستاویزات', url:'https://my.iub.edu.pk/cms/cms/std_documents', extra:true },
-    { key:'liveChat', label:'Live Chat', labelUr:'لائیو چیٹ', url:'https://salmanadeeb.wixsite.com/livechat', extra:true },
+    { key:'timetable', label:'Time Table', labelUr:'ٹائم ٹیبل', url:'https://my.iub.edu.pk/timetable/publics', gated:true },
+    { key:'studentCard', label:'Student Card', labelUr:'اسٹوڈنٹ کارڈ', url:'https://my.iub.edu.pk/cba/student/student_card', gated:true },
+    { key:'societies', label:'Societies', labelUr:'سوسائٹیز', url:'https://my.iub.edu.pk/dsa/student/application#step-1', gated:true },
+    { key:'courses', label:'Short Courses', labelUr:'مختصر کورسز', url:'https://eportal.iub.edu.pk/short_courses/std/students/apply', gated:true },
+    { key:'vehicle', label:'Vehicle Entry', labelUr:'گاڑی کا اندراج', url:'https://my.iub.edu.pk/security/vehicle', extra:true, gated:true },
+    { key:'rollNo', label:'Roll No Slips', labelUr:'رول نمبر سلپ', url:'https://my.iub.edu.pk/cms/student_survey', extra:true, gated:true },
+    { key:'clearance', label:'My Clearance', labelUr:'میری کلیئرنس', url:'https://my.iub.edu.pk/cms/clearance', extra:true, gated:true },
+    { key:'documents', label:'My Documents', labelUr:'میرے دستاویزات', url:'https://my.iub.edu.pk/cms/cms/std_documents', extra:true, gated:true },
+    { key:'liveChat', label:'Live Chat', labelUr:'لائیو چیٹ', url:'https://salmanadeeb.wixsite.com/livechat', extra:true, external:true },
     { key:'announcement', label:'Announcement', labelUr:'اعلانات', url:'https://whatsapp.com/channel/0029VaF6qjjJZg44rpOzhf1O', extra:true, external:true },
-    { key:'hostel', label:'Hostel', labelUr:'ہاسٹل', url:'https://eportal.iub.edu.pk/eportal/hostelportal', extra:true },
+    { key:'hostel', label:'Hostel', labelUr:'ہاسٹل', url:'https://eportal.iub.edu.pk/eportal/hostelportal', extra:true, gated:true },
     { key:'downloads', label:'Download Forms', labelUr:'فارم ڈاؤن لوڈ کریں', url:'https://www.iub.edu.pk/downloads', extra:true },
-    { key:'email', label:'IUB Email', labelUr:'آئی یو بی ای میل', url:'https://mail.google.com/a/iub.edu.pk', extra:true },
+    { key:'email', label:'IUB Email', labelUr:'آئی یو بی ای میل', url:'https://mail.google.com/a/iub.edu.pk', extra:true, external:true },
     { key:'contact', label:'Contact', labelUr:'رابطہ کریں', url:'https://www.iub.edu.pk/contact', extra:true },
-    { key:'repeatCourse', label:'Repeat Course', labelUr:'دوبارہ کورس', url:'https://my.iub.edu.pk/academics/student/enrollment/course_repeat_challan', extra:true },
+    { key:'repeatCourse', label:'Repeat Course', labelUr:'دوبارہ کورس', url:'https://my.iub.edu.pk/academics/student/enrollment/course_repeat_challan', extra:true, gated:true },
     { key:'library', label:'Library', labelUr:'لائبریری', url:'https://library.iub.edu.pk/', extra:true },
   ];
 
@@ -255,13 +260,7 @@ const icons = {
       <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${icons[item.key]}</svg></span>
       <span class="lbl" data-en="${item.label}" data-ur="${item.labelUr}">${item.label}</span>
     `;
-    el.addEventListener('click', () => {
-      if(item.external){
-        window.open(item.url, '_blank', 'noopener');
-      } else {
-        openPortal(el.querySelector('.lbl').textContent, item.url);
-      }
-    });
+    el.addEventListener('click', () => goTo(item));
     quickGrid.appendChild(el);
   });
 
@@ -283,6 +282,7 @@ const icons = {
   });
 
   const bannerEl = document.getElementById('banner');
+  const bannerPhoto = document.getElementById('bannerPhoto');
   const bannerText = document.getElementById('bannerText');
   const dotsEl = document.getElementById('bannerDots');
   banners.forEach((b,i) => {
@@ -292,8 +292,7 @@ const icons = {
   });
   let bIndex = 0;
   function setBanner(i){
-    bannerEl.style.backgroundImage =
-      `linear-gradient(90deg, rgba(10,16,38,0.88) 0%, rgba(10,16,38,0.55) 45%, rgba(10,16,38,0.15) 100%), url("${banners[i].image}")`;
+    bannerPhoto.style.backgroundImage = `url("${banners[i].image}")`;
     bannerText.innerHTML = t(banners[i].text, banners[i].textUr);
     [...dotsEl.children].forEach((d,idx) => d.className = idx===i ? 'active' : '');
   }
@@ -341,7 +340,7 @@ const icons = {
       const item = quickLinks.find(q => q.key === key);
       setActiveSidebarLink(link);
       closeSidebar();
-      if(item) openPortal(item.label, item.url);
+      goTo(item);
     });
   });
 
@@ -358,12 +357,6 @@ const icons = {
   });
   document.getElementById('closeSettings').addEventListener('click', () => modal.classList.remove('show'));
   modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('show'); });
-
-  document.getElementById('sidebarHelpBtn').addEventListener('click', () => {
-    closeSidebar();
-    const item = quickLinks.find(q => q.key === 'contact');
-    if(item) openPortal(item.label, item.url);
-  });
 
   // ===================== BELL / NOTIFICATIONS =====================
   document.getElementById('notifBtn').addEventListener('click', () => {
@@ -449,7 +442,7 @@ const icons = {
   // project, a relative path just works — no URL to configure.
   // Set to '' to disable proxying (falls back to best-effort iframe + fallback).
   const PROXY_BASE = '/api/proxy';
-  const PROXY_HOSTS = ['www.iub.edu.pk', 'iub.edu.pk', 'eportal.iub.edu.pk', 'my.iub.edu.pk', 'lms.iub.edu.pk'];
+  const PROXY_HOSTS = ['www.iub.edu.pk', 'iub.edu.pk', 'eportal.iub.edu.pk', 'my.iub.edu.pk', 'lms.iub.edu.pk', 'library.iub.edu.pk'];
 
   function proxiedUrl(url){
     if(!PROXY_BASE) return url;
@@ -484,6 +477,25 @@ const icons = {
     portalFrame.src = proxiedUrl(url);
     portalModal.classList.add('show');
   }
+
+  // Central place that decides HOW a link opens:
+  // - external (non-IUB sites): new tab
+  // - gated (needs an IUB login): full same-tab navigation to the real
+  //   iub.edu.pk page — login/CAPTCHA work normally, and the session that
+  //   results is a real IUB session in the student's own browser, shared
+  //   automatically across any other page on that same subdomain
+  // - everything else (public IUB pages): embedded viewer, as before
+  function goTo(item){
+    if(!item || !item.url) return showToast((item ? item.label : '') + ' — link coming soon');
+    const label = t(item.label, item.labelUr);
+    if(item.external){
+      window.open(item.url, '_blank', 'noopener');
+    } else if(item.gated){
+      window.location.href = item.url;
+    } else {
+      openPortal(label, item.url);
+    }
+  }
   portalFrame.addEventListener('load', () => {
     portalProgress.style.transition = 'width .3s ease';
     portalProgress.style.width = '100%';
@@ -495,10 +507,12 @@ const icons = {
   });
   portalModal.addEventListener('click', (e) => { if(e.target === portalModal) document.getElementById('closePortal').click(); });
 
-  // Top shortcut row — EPortal / MyIUB / LMS
-  document.getElementById('scEportal').addEventListener('click', (e) => openPortal(e.currentTarget.textContent, 'https://eportal.iub.edu.pk'));
-  document.getElementById('scMyiub').addEventListener('click', (e) => openPortal(e.currentTarget.textContent, 'https://my.iub.edu.pk/cms'));
-  document.getElementById('scLms').addEventListener('click', (e) => openPortal(e.currentTarget.textContent, 'https://lms.iub.edu.pk/my/'));
+  // Top shortcut row — EPortal / MyIUB / LMS. All three land on a login
+  // dashboard, so send the browser there directly (same as a gated
+  // quickLink) rather than through the embedded viewer.
+  document.getElementById('scEportal').addEventListener('click', () => { window.location.href = 'https://eportal.iub.edu.pk'; });
+  document.getElementById('scMyiub').addEventListener('click', () => { window.location.href = 'https://my.iub.edu.pk/cms'; });
+  document.getElementById('scLms').addEventListener('click', () => { window.location.href = 'https://lms.iub.edu.pk/my/'; });
 
   // Banner is clickable — opens whichever slide is currently showing
   bannerEl.style.cursor = 'pointer';

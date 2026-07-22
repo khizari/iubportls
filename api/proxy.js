@@ -25,6 +25,7 @@ const ALLOWED_HOSTS = [
   'eportal.iub.edu.pk',
   'my.iub.edu.pk',
   'lms.iub.edu.pk',
+  'library.iub.edu.pk',
 ];
 
 // Disable Vercel's automatic body parsing so we can read+forward the raw

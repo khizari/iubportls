@@ -28,6 +28,7 @@ const ALLOWED_HOSTS = [
   'eportal.iub.edu.pk',
   'my.iub.edu.pk',
   'lms.iub.edu.pk',
+  'library.iub.edu.pk',
 ];
 
 const SESSION_COOKIE = 'iubproxy_sid';

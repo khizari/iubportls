@@ -108,6 +108,7 @@
 
   <!-- ===================== TOP NAV ===================== -->
   <div class="topnav">
+    <div class="topnav-inner">
     <button class="nav-icon-btn hamburger-btn" id="hamburgerBtn" title="Menu">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
@@ -130,6 +131,7 @@
         <div class="pic">A</div>
         <div class="txt">Hi abc,<small>Good Morning</small></div>
       </div>
+    </div>
     </div>
   </div>
 
@@ -194,17 +196,6 @@
           <p class="sfc-sub" data-en="Install IUB Portals from Google Play." data-ur="گوگل پلے سے آئی یو بی پورٹلز انسٹال کریں۔">Install IUB Portals from Google Play.</p>
           <a class="sfc-btn" href="https://play.google.com/store/apps/details?id=com.AdeebTechLab.IUBportals&pcampaignid=web_share" target="_blank" rel="noopener noreferrer" data-en="Download Now" data-ur="ابھی ڈاؤن لوڈ کریں">Download Now</a>
         </div>
-
-        <div class="sidebar-footer-card">
-          <svg class="sfc-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-            <path d="M12 2 9.5 5v2h5V5Z"/><circle cx="14.8" cy="4.6" r="1"/>
-            <path d="M5 21V11a7 7 0 0 1 14 0v10"/>
-            <path d="M5 21h14"/><path d="M9 21v-5h6v5"/>
-          </svg>
-          <p class="sfc-title" data-en="Need a hand?" data-ur="مدد چاہیے؟">Need a hand?</p>
-          <p class="sfc-sub" data-en="Reach the IUB helpdesk in one tap." data-ur="ایک ٹیپ میں آئی یو بی ہیلپ ڈیسک تک پہنچیں۔">Reach the IUB helpdesk in one tap.</p>
-          <button class="sfc-btn" id="sidebarHelpBtn" data-en="Contact Support" data-ur="معاونت سے رابطہ کریں">Contact Support</button>
-        </div>
       </div>
     </div>
 
@@ -219,7 +210,10 @@
 
       <div class="banner-row">
         <div class="banner" id="banner">
-          <h2 id="bannerText">ADMISSION<br>LAST DATE</h2>
+          <div class="banner-text">
+            <h2 id="bannerText">ADMISSION<br>LAST DATE</h2>
+          </div>
+          <div class="banner-photo" id="bannerPhoto"></div>
           <div class="banner-dots" id="bannerDots"></div>
         </div>
       </div>
