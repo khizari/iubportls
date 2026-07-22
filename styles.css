@@ -137,11 +137,8 @@
   .side-link:hover{ background: var(--card); }
   .side-link.active{ background: var(--navy); color: var(--gold); }
   .side-link svg{ flex-shrink:0; }
-  a.side-link{ text-decoration:none; margin: 4px 0; }
-  .side-link.playstore-link{ color: #01875f; }
-  .side-link.playstore-link:hover{ background: rgba(1,135,95,0.08); }
 
-  .sidebar-footer{ margin-top:auto; padding-top: 18px; }
+  .sidebar-footer{ margin-top:auto; padding-top: 18px; display:flex; flex-direction:column; gap:14px; }
   .sidebar-footer-card{
     background: linear-gradient(160deg, var(--navy) 0%, #0e1a3d 100%);
     border-radius: var(--radius-lg);
@@ -179,6 +176,7 @@
     transition: filter .12s ease;
   }
   .sfc-btn:hover{ filter: brightness(1.08); }
+  a.sfc-btn{ display:block; text-align:center; text-decoration:none; box-sizing:border-box; }
 
   /* ===================== MAIN ===================== */
   .main{
@@ -273,14 +271,14 @@
     flex:1;
     padding: 13px 16px;
     border-radius: var(--radius-md);
-    border: 1px solid var(--border);
-    background: var(--card);
+    border: 1px solid rgba(22,35,79,0.12);
+    background: var(--gold);
     color: var(--navy);
     font-family:'Poppins'; font-weight:700; font-size: 13.5px;
     cursor:pointer;
-    transition: border-color .12s ease, transform .12s ease;
+    transition: border-color .12s ease, transform .12s ease, filter .12s ease;
   }
-  .shortcut-pill:hover{ border-color: var(--gold); transform: translateY(-2px); }
+  .shortcut-pill:hover{ border-color: var(--navy); transform: translateY(-2px); filter: brightness(1.06); }
 
   .show-more-btn{
     grid-column: 1 / -1;
@@ -624,19 +622,19 @@
 
 .split-brand-content{ position:relative; z-index:1; max-width: 440px; }
 .split-brand-content .auth-mark{
-  width: 52px; height:52px; border-radius:12px;
+  width: 132px; height:132px; border-radius:22px;
   background: var(--gold);
   color: var(--navy);
   font-weight:800; font-size:16px;
   display:flex; align-items:center; justify-content:center;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
   overflow:hidden;
 }
 .split-brand-content .auth-mark img{
   width:100%; height:100%; object-fit:cover;
 }
 .split-brand-content .welcome-icon{
-  width: 64px; height:64px; border-radius:14px;
+  width: 132px; height:132px; border-radius:22px;
   background: rgba(240,180,41,0.14);
   color: var(--gold);
   display:flex; align-items:center; justify-content:center;
@@ -752,10 +750,10 @@
   width: 36px; height:36px; border-radius:10px; flex-shrink:0;
   background: var(--gold-soft);
   color: var(--navy);
-  display:flex; align-items:center; justify-content:center;
-  box-sizing:border-box; padding:0; line-height:0;
+  display:grid; place-items:center;
+  box-sizing:border-box;
 }
-.wp-ic svg{ display:block; width:18px; height:18px; margin:auto; }
+.wp-ic svg{ display:block; }
 .wp-item strong{ display:block; font-size: 14px; color: var(--navy); }
 .wp-item span{ display:block; font-size: 12.5px; color: var(--text-muted); margin-top:2px; line-height:1.4; }
 
@@ -764,6 +762,8 @@
   .split-brand{ padding: 40px 32px; }
   .split-form{ padding: 40px 32px; }
   .split-brand-content h1{ font-size: 26px; }
+  .split-brand-content .auth-mark{ width:104px; height:104px; }
+  .split-brand-content .welcome-icon{ width:104px; height:104px; }
   .split-deco.d1{ width:280px; height:280px; top:-100px; left:-100px; }
   .split-deco.d2{ width:240px; height:240px; bottom:-120px; right:-100px; }
 }
@@ -771,6 +771,8 @@
   .split-brand{ padding: 32px 20px; }
   .split-form{ padding: 32px 20px; }
   .split-brand-content h1{ font-size: 22px; }
+  .split-brand-content .auth-mark{ width:84px; height:84px; border-radius:18px; }
+  .split-brand-content .welcome-icon{ width:84px; height:84px; border-radius:18px; }
   .split-brand-content p{ font-size: 13.5px; }
   .split-stats{ gap: 22px; flex-wrap:wrap; margin-top: 28px; }
   .split-form-inner h2{ font-size: 20px; }
@@ -790,7 +792,6 @@ body.dark-mode .side-link span,
 body.dark-mode .section-head h3,
 body.dark-mode .quick-item .lbl,
 body.dark-mode .quick-item .ic,
-body.dark-mode .shortcut-pill,
 body.dark-mode .announce-item .body .t,
 body.dark-mode .settings-panel h3,
 body.dark-mode .modal-row .label,
@@ -804,6 +805,7 @@ body.dark-mode .auth-label,
 body.dark-mode .avatar-circle-sm{
   color: #EDEFF5;
 }
+body.dark-mode .shortcut-pill{ color: var(--navy); border-color: rgba(0,0,0,0.15); }
 body.dark-mode .side-link.active{ color: var(--gold); }
 body.dark-mode .settings-panel{ background:#1b202e; }
 body.dark-mode .settings-panel .modal-row{ border-bottom-color: rgba(237,239,245,0.1); }
@@ -884,6 +886,13 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   0%{ background-position: 0% center; }
   50%{ background-position: 100% center; }
   100%{ background-position: 0% center; }
+}
+.wave-emoji{
+  background: none;
+  -webkit-text-fill-color: initial;
+  color: initial;
+  display: inline-block;
+  animation: none;
 }
 
 .auth-mark, .welcome-icon{ position:relative; }

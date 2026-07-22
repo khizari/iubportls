@@ -10,8 +10,14 @@ let currentLang = 'en';
 let currentUserName = '';
 function t(en, ur){ return currentLang === 'ur' ? ur : en; }
 
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 function goToWelcome(name){
-  document.getElementById('welcomeGreeting').textContent = t('Welcome, ', 'خوش آمدید، ') + name + ' 👋';
+  document.getElementById('welcomeGreeting').innerHTML = t('Welcome, ', 'خوش آمدید، ') + escapeHtml(name) + ' <span class="wave-emoji">👋</span>';
   loginScreen.style.display = 'none';
   welcomeScreen.style.display = 'flex';
 }
