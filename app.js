@@ -269,7 +269,10 @@ const icons = {
   quickGrid.appendChild(showMoreBtn);
   showMoreBtn.addEventListener('click', () => {
     expanded = !expanded;
-    document.querySelectorAll('.hidden-extra').forEach(el => el.classList.toggle('show', expanded));
+    document.querySelectorAll('.hidden-extra').forEach(el => {
+      el.classList.toggle('show', expanded);
+      if(expanded) el.classList.add('reveal-in');
+    });
     updateShowMoreLabel();
   });
 
@@ -494,3 +497,86 @@ const icons = {
   // Banner is clickable — opens whichever slide is currently showing
   bannerEl.style.cursor = 'pointer';
   bannerEl.addEventListener('click', () => openPortal(banners[bIndex].text.replace('<br>', ' '), banners[bIndex].url));
+
+// ===================== CREATIVE ENHANCEMENTS: motion & effects =====================
+// Ripple feedback, card tilt, scroll-triggered reveals, and the login-screen
+// stat counters. Everything here backs off automatically for anyone with
+// prefers-reduced-motion set, and none of it is required for the app to work.
+(function(){
+  const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- Ripple on click for buttons, pills and cards ----
+  const RIPPLE_SELECTOR = '.login-submit,.btn-navy,.btn-light,.sfc-btn,.close-settings,' +
+    '.shortcut-pill,.show-more-btn,.quick-item,.nav-icon-btn,.portal-icon-btn,.sidebar-close-btn,.portal-stuck-btn';
+  function spawnRipple(el, x, y){
+    const rect = el.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 1.4;
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (x - rect.left - size / 2) + 'px';
+    ripple.style.top = (y - rect.top - size / 2) + 'px';
+    el.appendChild(ripple);
+    ripple.addEventListener('animationend', () => ripple.remove());
+  }
+  if(!reducedMotion){
+    document.addEventListener('click', (e) => {
+      const el = e.target.closest(RIPPLE_SELECTOR);
+      if(el) spawnRipple(el, e.clientX, e.clientY);
+    });
+  }
+
+  // ---- Subtle 3D tilt on Quick Links cards ----
+  if(!reducedMotion){
+    document.querySelectorAll('.quick-item').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        card.style.setProperty('--ry', (px * 10).toFixed(2) + 'deg');
+        card.style.setProperty('--rx', (py * -10).toFixed(2) + 'deg');
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.setProperty('--rx', '0deg');
+        card.style.setProperty('--ry', '0deg');
+      });
+    });
+  }
+
+  // ---- Staggered scroll/appear reveal for cards, announcements, banner ----
+  const revealTargets = document.querySelectorAll('.quick-item:not(.hidden-extra), .announce-item, .banner-row, .shortcut-row');
+  if(!reducedMotion && 'IntersectionObserver' in window){
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          entry.target.classList.add('reveal-in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealTargets.forEach((el, i) => {
+      el.style.transitionDelay = Math.min(i * 40, 400) + 'ms';
+      io.observe(el);
+    });
+  } else {
+    revealTargets.forEach(el => el.classList.add('reveal-in'));
+    document.querySelectorAll('.quick-item').forEach(el => el.classList.add('reveal-in'));
+  }
+
+  // ---- Count-up animation for the login screen's stat numbers ----
+  function animateCounter(el, target, duration){
+    if(reducedMotion){ el.textContent = target; return; }
+    const start = performance.now();
+    function step(now){
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(eased * target);
+      if(p < 1) requestAnimationFrame(step);
+      else el.textContent = target;
+    }
+    requestAnimationFrame(step);
+  }
+  document.querySelectorAll('[data-count]').forEach(el => {
+    animateCounter(el, parseInt(el.getAttribute('data-count'), 10) || 0, 1100);
+  });
+})();
