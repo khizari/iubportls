@@ -220,7 +220,7 @@ const icons = {
     { key:'entryTest', label:'Entry Test', labelUr:'انٹری ٹیسٹ', url:'https://eportal.iub.edu.pk/eportal/its', gated:true },
     { key:'scholarship', label:'Scholarships', labelUr:'وظائف', url:'https://my.iub.edu.pk/scholarship/apply', gated:true },
     { key:'vouchers', label:'Vouchers', labelUr:'واؤچرز', url:'https://my.iub.edu.pk/academics/student/finance/my_vouchers', gated:true },
-    { key:'admissions', label:'Admissions', labelUr:'داخلے', url:'https://eportal.iub.edu.pk/eportal/admissions' },
+    { key:'admissions', label:'Admissions', labelUr:'داخلے', url:'https://eportal.iub.edu.pk/eportal/admissions', gated:true },
     { key:'timetable', label:'Time Table', labelUr:'ٹائم ٹیبل', url:'https://my.iub.edu.pk/timetable/publics', gated:true },
     { key:'studentCard', label:'Student Card', labelUr:'اسٹوڈنٹ کارڈ', url:'https://my.iub.edu.pk/cba/student/student_card', gated:true },
     { key:'societies', label:'Societies', labelUr:'سوسائٹیز', url:'https://my.iub.edu.pk/dsa/student/application#step-1', gated:true },
