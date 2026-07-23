@@ -209,10 +209,14 @@ const icons = {
     { text: 'MERIT<br>LIST', textUr: 'میرٹ<br>لسٹ', image: 'assets/merit-list.webp', url:'https://eportal.iub.edu.pk/meritlists/index.php?p=' },
     { text: 'TRANSPORT<br>SCHEDULE', textUr: 'ٹرانسپورٹ کا<br>شیڈول', image: 'assets/transport-schedule.webp', url:'https://drive.google.com/file/d/1Cte7DZAqOdvqTKsnzE8nQJPbgL2jFs3r/view?usp=sharing' },
   ];
-  // Preload every banner photo into the browser cache right away, so
-  // setBanner() never shows the new caption before its photo has arrived —
-  // by the time the rotation reaches a slide, its image is already cached.
-  banners.forEach(b => { const preload = new Image(); preload.src = b.image; });
+  // Preload every banner photo into the browser cache right away, and
+  // keep the Image objects so we can check when each has actually
+  // finished loading — not just "requested".
+  const preloadedBanners = banners.map(b => {
+    const img = new Image();
+    img.src = b.image;
+    return img;
+  });
 
   const quickGrid = document.getElementById('quickGrid');
   const quickLinkCount = document.getElementById('quickLinkCount');
@@ -266,7 +270,18 @@ const icons = {
     bannerText.innerHTML = t(banners[i].text, banners[i].textUr);
     [...dotsEl.children].forEach((d,idx) => d.className = idx===i ? 'active' : '');
   }
-  setBanner(0);
+  // The very first banner is shown the instant its photo is actually ready
+  // (already-cached images resolve this immediately), rather than as soon
+  // as the script runs — that's what was letting the caption appear before
+  // the photo had finished downloading.
+  const firstBannerImg = preloadedBanners[0];
+  function showFirstBanner(){ setBanner(0); }
+  if(firstBannerImg.complete){
+    showFirstBanner();
+  } else {
+    firstBannerImg.addEventListener('load', showFirstBanner, { once:true });
+    firstBannerImg.addEventListener('error', showFirstBanner, { once:true });
+  }
   setInterval(() => { bIndex = (bIndex+1) % banners.length; setBanner(bIndex); }, 3400);
 
   let toastTimer;
@@ -492,14 +507,31 @@ const icons = {
     portalModal.classList.add('show');
   }
 
-  // Every Quick Link (public, gated, or external) now opens inside the
-  // embedded portal viewer. The gated/external flags are kept on each
-  // item for reference (and for "Open in new tab" fallback inside the
-  // viewer), but no longer change how the link is launched here.
+  // Central place that decides HOW a link opens:
+  // - external (non-IUB sites): new tab
+  // - gated (needs an IUB login): full same-tab navigation to the real
+  //   iub.edu.pk page. This MUST NOT go through the embedded iframe —
+  //   IUB's login pages validate their CAPTCHA against the real
+  //   my.iub.edu.pk / eportal.iub.edu.pk domain, and it will report
+  //   "Invalid captcha detected" on every attempt if loaded through the
+  //   proxy under a different domain. Same-tab navigation is fine for
+  //   the shared-session goal: cookies persist per-domain regardless of
+  //   tab or navigation history, so once a student logs into
+  //   my.iub.edu.pk via one gated link, any later same-tab visit to
+  //   another my.iub.edu.pk gated link is already logged in — no extra
+  //   code needed for that part. The browser Back button returns to
+  //   this dashboard afterward (same tab, state intact).
+  // - everything else (public IUB pages): embedded viewer
   function goTo(item){
     if(!item || !item.url) return showToast((item ? item.label : '') + ' — link coming soon');
     const label = t(item.label, item.labelUr);
-    openPortal(label, item.url);
+    if(item.external){
+      window.open(item.url, '_blank', 'noopener');
+    } else if(item.gated){
+      window.location.href = item.url;
+    } else {
+      openPortal(label, item.url);
+    }
   }
   portalFrame.addEventListener('load', () => {
     portalProgress.style.transition = 'width .3s ease';
@@ -532,11 +564,13 @@ const icons = {
     setMaximizeIcon(isFullscreen);
   });
 
-  // Top shortcut row — EPortal / MyIUB / LMS — now open in the same
-  // embedded portal viewer as everything else.
-  document.getElementById('scEportal').addEventListener('click', () => openPortal('EPortal', 'https://eportal.iub.edu.pk'));
-  document.getElementById('scMyiub').addEventListener('click', () => openPortal('MyIUB', 'https://my.iub.edu.pk/cms'));
-  document.getElementById('scLms').addEventListener('click', () => openPortal('LMS', 'https://lms.iub.edu.pk/my/'));
+  // Top shortcut row — EPortal / MyIUB / LMS. All three land on a login
+  // dashboard protected by a domain-locked CAPTCHA, so — same reasoning
+  // as gated Quick Links above — send the browser there directly rather
+  // than through the embedded iframe, or login will never succeed.
+  document.getElementById('scEportal').addEventListener('click', () => { window.location.href = 'https://eportal.iub.edu.pk'; });
+  document.getElementById('scMyiub').addEventListener('click', () => { window.location.href = 'https://my.iub.edu.pk/cms'; });
+  document.getElementById('scLms').addEventListener('click', () => { window.location.href = 'https://lms.iub.edu.pk/my/'; });
 
   // Banner is clickable — opens whichever slide is currently showing
   bannerEl.style.cursor = 'pointer';

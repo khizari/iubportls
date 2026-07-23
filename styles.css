@@ -222,10 +222,10 @@
   .banner-photo{
     flex:1;
     position:relative;
+    background-color: var(--navy-2);
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
-    transition: background-image .4s ease;
   }
   .banner-dots{
     position:absolute; bottom:16px; left:20px; display:flex; gap:6px; z-index:3;
@@ -534,7 +534,7 @@
   .portal-icon-btn:hover{ background: rgba(255,255,255,0.18); }
   .portal-title{
     color:#fff; font-weight:700; font-size:14px;
-    flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   .portal-open-new{
     display:flex; align-items:center; gap:6px;
@@ -652,6 +652,10 @@
     .quick-grid{ grid-template-columns: repeat(2,1fr); }
     .nav-profile .txt{ display:none; }
     .portal-panel{ width:100vw; height:100vh; border-radius:0; }
+    .portal-topbar{ padding: 0 10px; gap: 8px; }
+    .portal-icon-btn{ width:30px; height:30px; }
+    .portal-open-new{ padding: 7px 9px; }
+    .portal-open-new span{ display:none; }
     .banner{ flex-direction:column; height:auto; }
     .banner-text{ width:100%; padding: 16px 20px; }
     .banner-photo{ flex: 0 0 130px; height: 130px; width:100%; }
