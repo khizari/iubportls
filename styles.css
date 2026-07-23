@@ -296,6 +296,29 @@
   .quick-item.hidden-extra.show{ display:flex; }
   .quick-item.search-hidden{ display:none !important; }
 
+  /* Section label spanning the full grid width, sitting above the first
+     tile of each login-session group (MyIUB / EPortal / No login needed) */
+  .quick-group-label{
+    grid-column: 1 / -1;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top: 6px;
+    font-family:'Poppins'; font-weight:700; font-size: 11.5px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .quick-group-label:first-child{ margin-top:0; }
+  .quick-group-label::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background: var(--border);
+  }
+  .quick-group-label.hidden-extra{ display:none; }
+  .quick-group-label.hidden-extra.show{ display:flex; }
+
   /* ===================== TOP SHORTCUT ROW (EPortal / MyIUB / LMS) ===================== */
   .shortcut-row{
     display:flex; gap:10px;

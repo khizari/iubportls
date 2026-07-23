@@ -180,26 +180,36 @@ const icons = {
   // opening inside the embedded viewer, so login/CAPTCHA work normally and
   // the session the student ends up with is a real IUB session in their
   // own browser — not one held by this app.
+  // Grouped by which login session they use, so buttons sharing a
+  // session sit together: MyIUB (my.iub.edu.pk) first, then EPortal
+  // (eportal.iub.edu.pk), then the remaining links that don't need an
+  // IUB login at all. (LMS has no Quick Link tile of its own — it's
+  // only the "LMS" shortcut pill in the top row.)
   const quickLinks = [
-    { key:'entryTest', label:'Entry Test', labelUr:'انٹری ٹیسٹ', url:'https://eportal.iub.edu.pk/eportal/its', gated:true },
+    // ---- MyIUB session (my.iub.edu.pk) ----
     { key:'scholarship', label:'Scholarships', labelUr:'وظائف', url:'https://my.iub.edu.pk/scholarship/apply', gated:true },
     { key:'vouchers', label:'Vouchers', labelUr:'واؤچرز', url:'https://my.iub.edu.pk/academics/student/finance/my_vouchers', gated:true },
-    { key:'admissions', label:'Admissions', labelUr:'داخلے', url:'https://eportal.iub.edu.pk/eportal/admissions', gated:true },
     { key:'timetable', label:'Time Table', labelUr:'ٹائم ٹیبل', url:'https://my.iub.edu.pk/timetable/publics', gated:true },
     { key:'studentCard', label:'Student Card', labelUr:'اسٹوڈنٹ کارڈ', url:'https://my.iub.edu.pk/cba/student/student_card', gated:true },
     { key:'societies', label:'Societies', labelUr:'سوسائٹیز', url:'https://my.iub.edu.pk/dsa/student/application#step-1', gated:true },
-    { key:'courses', label:'Short Courses', labelUr:'مختصر کورسز', url:'https://eportal.iub.edu.pk/short_courses/std/students/apply', gated:true },
     { key:'vehicle', label:'Vehicle Entry', labelUr:'گاڑی کا اندراج', url:'https://my.iub.edu.pk/security/vehicle', extra:true, gated:true },
     { key:'rollNo', label:'Roll No Slips', labelUr:'رول نمبر سلپ', url:'https://my.iub.edu.pk/cms/student_survey', extra:true, gated:true },
     { key:'clearance', label:'My Clearance', labelUr:'میری کلیئرنس', url:'https://my.iub.edu.pk/cms/clearance', extra:true, gated:true },
     { key:'documents', label:'My Documents', labelUr:'میرے دستاویزات', url:'https://my.iub.edu.pk/cms/cms/std_documents', extra:true, gated:true },
+    { key:'repeatCourse', label:'Repeat Course', labelUr:'دوبارہ کورس', url:'https://my.iub.edu.pk/academics/student/enrollment/course_repeat_challan', extra:true, gated:true },
+
+    // ---- EPortal session (eportal.iub.edu.pk) ----
+    { key:'entryTest', label:'Entry Test', labelUr:'انٹری ٹیسٹ', url:'https://eportal.iub.edu.pk/eportal/its', gated:true },
+    { key:'admissions', label:'Admissions', labelUr:'داخلے', url:'https://eportal.iub.edu.pk/eportal/admissions', gated:true },
+    { key:'courses', label:'Short Courses', labelUr:'مختصر کورسز', url:'https://eportal.iub.edu.pk/short_courses/std/students/apply', gated:true },
+    { key:'hostel', label:'Hostel', labelUr:'ہاسٹل', url:'https://eportal.iub.edu.pk/eportal/hostelportal', extra:true, gated:true },
+
+    // ---- No IUB login needed (each on its own separate domain) ----
     { key:'liveChat', label:'Live Chat', labelUr:'لائیو چیٹ', url:'https://salmanadeeb.wixsite.com/livechat', extra:true, external:true },
     { key:'announcement', label:'Announcement', labelUr:'اعلانات', url:'https://whatsapp.com/channel/0029VaF6qjjJZg44rpOzhf1O', extra:true, external:true },
-    { key:'hostel', label:'Hostel', labelUr:'ہاسٹل', url:'https://eportal.iub.edu.pk/eportal/hostelportal', extra:true, gated:true },
-    { key:'downloads', label:'Download Forms', labelUr:'فارم ڈاؤن لوڈ کریں', url:'https://www.iub.edu.pk/downloads', extra:true },
+    { key:'downloads', label:'Download Forms', labelUr:'فارم ڈاؤن لوڈ کریں', url:'https://www.iub.edu.pk/downloads', extra:true, external:true },
     { key:'email', label:'IUB Email', labelUr:'آئی یو بی ای میل', url:'https://mail.google.com/a/iub.edu.pk', extra:true, external:true },
     { key:'contact', label:'Contact', labelUr:'رابطہ کریں', url:'https://www.iub.edu.pk/contact', extra:true },
-    { key:'repeatCourse', label:'Repeat Course', labelUr:'دوبارہ کورس', url:'https://my.iub.edu.pk/academics/student/enrollment/course_repeat_challan', extra:true, gated:true },
     { key:'library', label:'Library', labelUr:'لائبریری', url:'https://library.iub.edu.pk/', extra:true },
   ];
 
@@ -225,7 +235,25 @@ const icons = {
   }
   updateServicesCount();
 
+  // Full-width section labels shown inline in the Quick Links grid,
+  // right above the first tile of each session group — keyed by the
+  // first item's key in that group.
+  const groupLabels = {
+    scholarship: { en: 'MyIUB Services', ur: 'مائی آئی یو بی سروسز' },
+    entryTest:   { en: 'EPortal Services', ur: 'ای پورٹل سروسز' },
+    liveChat:    { en: 'No Login Needed', ur: 'لاگ ان کی ضرورت نہیں' },
+  };
+
   quickLinks.forEach(item => {
+    const groupLabel = groupLabels[item.key];
+    if(groupLabel){
+      const headerEl = document.createElement('div');
+      headerEl.className = 'quick-group-label' + (item.extra ? ' hidden-extra' : '');
+      headerEl.setAttribute('data-en', groupLabel.en);
+      headerEl.setAttribute('data-ur', groupLabel.ur);
+      headerEl.textContent = t(groupLabel.en, groupLabel.ur);
+      quickGrid.appendChild(headerEl);
+    }
     const el = document.createElement('div');
     el.className = 'quick-item' + (item.extra ? ' hidden-extra' : '');
     const accent = iconColors[item.key] || '#F0B429';
@@ -508,29 +536,28 @@ const icons = {
   }
 
   // Central place that decides HOW a link opens:
-  // - external (non-IUB sites): new tab
-  // - gated (needs an IUB login): full same-tab navigation to the real
-  //   iub.edu.pk page. This MUST NOT go through the embedded iframe —
-  //   IUB's login pages validate their CAPTCHA against the real
-  //   my.iub.edu.pk / eportal.iub.edu.pk domain, and it will report
-  //   "Invalid captcha detected" on every attempt if loaded through the
-  //   proxy under a different domain. Same-tab navigation is fine for
-  //   the shared-session goal: cookies persist per-domain regardless of
-  //   tab or navigation history, so once a student logs into
-  //   my.iub.edu.pk via one gated link, any later same-tab visit to
-  //   another my.iub.edu.pk gated link is already logged in — no extra
-  //   code needed for that part. The browser Back button returns to
-  //   this dashboard afterward (same tab, state intact).
-  // - everything else (public IUB pages): embedded viewer
+  // - external (bell, Announcement, Download Forms, Live Chat, Email):
+  //   new tab, so the dashboard stays open behind it.
+  // - everything else (gated IUB logins like Scholarships, and all
+  //   public IUB pages like Contact/Library) — same-tab navigation to
+  //   the real iub.edu.pk page, same as the gated links always did.
+  //   This MUST NOT go through the embedded iframe — IUB's login pages
+  //   validate their CAPTCHA against the real my.iub.edu.pk /
+  //   eportal.iub.edu.pk domain, and it will report "Invalid captcha
+  //   detected" on every attempt if loaded through the proxy under a
+  //   different domain. Same-tab navigation is fine for the
+  //   shared-session goal: cookies persist per-domain regardless of tab
+  //   or navigation history, so once a student logs into my.iub.edu.pk
+  //   via one gated link, any later same-tab visit to another
+  //   my.iub.edu.pk gated link is already logged in — no extra code
+  //   needed for that part. The browser Back button returns to this
+  //   dashboard afterward (same tab, state intact).
   function goTo(item){
     if(!item || !item.url) return showToast((item ? item.label : '') + ' — link coming soon');
-    const label = t(item.label, item.labelUr);
     if(item.external){
       window.open(item.url, '_blank', 'noopener');
-    } else if(item.gated){
-      window.location.href = item.url;
     } else {
-      openPortal(label, item.url);
+      window.location.href = item.url;
     }
   }
   portalFrame.addEventListener('load', () => {
@@ -572,9 +599,10 @@ const icons = {
   document.getElementById('scMyiub').addEventListener('click', () => { window.location.href = 'https://my.iub.edu.pk/cms'; });
   document.getElementById('scLms').addEventListener('click', () => { window.location.href = 'https://lms.iub.edu.pk/my/'; });
 
-  // Banner is clickable — opens whichever slide is currently showing
+  // Banner is clickable — navigates the same tab to whichever slide is
+  // currently showing (same behavior as the gated Quick Links, e.g. Scholarships).
   bannerEl.style.cursor = 'pointer';
-  bannerEl.addEventListener('click', () => openPortal(banners[bIndex].text.replace('<br>', ' '), banners[bIndex].url));
+  bannerEl.addEventListener('click', () => { window.location.href = banners[bIndex].url; });
 
 // ===================== CREATIVE ENHANCEMENTS: motion & effects =====================
 // Ripple feedback, card tilt, scroll-triggered reveals, and count-up stat
