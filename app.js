@@ -207,8 +207,8 @@ const icons = {
     // ---- No IUB login needed (each on its own separate domain) ----
     { key:'liveChat', label:'Live Chat', labelUr:'لائیو چیٹ', url:'https://salmanadeeb.wixsite.com/livechat', extra:true, external:true },
     { key:'announcement', label:'Announcement', labelUr:'اعلانات', url:'https://whatsapp.com/channel/0029VaF6qjjJZg44rpOzhf1O', extra:true, external:true },
-    { key:'downloads', label:'Download Forms', labelUr:'فارم ڈاؤن لوڈ کریں', url:'https://www.iub.edu.pk/downloads', extra:true, external:true },
-    { key:'email', label:'IUB Email', labelUr:'آئی یو بی ای میل', url:'https://mail.google.com/a/iub.edu.pk', extra:true, external:true },
+    { key:'downloads', label:'Download Forms', labelUr:'فارم ڈاؤن لوڈ کریں', url:'https://www.iub.edu.pk/downloads', extra:true },
+    { key:'email', label:'IUB Email', labelUr:'آئی یو بی ای میل', url:'https://mail.google.com/a/iub.edu.pk', extra:true },
     { key:'contact', label:'Contact', labelUr:'رابطہ کریں', url:'https://www.iub.edu.pk/contact', extra:true },
     { key:'library', label:'Library', labelUr:'لائبریری', url:'https://library.iub.edu.pk/', extra:true },
   ];
@@ -264,6 +264,11 @@ const icons = {
     `;
     el.addEventListener('click', () => goTo(item));
     quickGrid.appendChild(el);
+    // Keep a direct reference to this tile on the item itself, so the
+    // search filter (and anything else) can look it up reliably instead
+    // of assuming quickGrid.children[idx] lines up with quickLinks[idx]
+    // — it doesn't, once the group-label headers above are mixed in.
+    item.el = el;
   });
 
   const showMoreBtn = document.createElement('button');
@@ -454,8 +459,8 @@ const icons = {
     const q = e.target.value.trim().toLowerCase();
     const searching = q.length > 0;
     const wasSearching = quickGrid.dataset.searching === '1';
-    quickLinks.forEach((item, idx) => {
-      const el = quickGrid.children[idx];
+    quickLinks.forEach((item) => {
+      const el = item.el;
       const match = item.label.toLowerCase().includes(q);
       el.classList.toggle('search-hidden', !match);
       // While searching, reveal any matching item even if it's normally
@@ -536,11 +541,12 @@ const icons = {
   }
 
   // Central place that decides HOW a link opens:
-  // - external (bell, Announcement, Download Forms, Live Chat, Email):
-  //   new tab, so the dashboard stays open behind it.
-  // - everything else (gated IUB logins like Scholarships, and all
-  //   public IUB pages like Contact/Library) — same-tab navigation to
-  //   the real iub.edu.pk page, same as the gated links always did.
+  // - external (bell, Announcement, Live Chat): new tab, so the
+  //   dashboard stays open behind it.
+  // - everything else (gated IUB logins like Scholarships, all public
+  //   IUB pages like Contact/Library, and Download Forms/Email) —
+  //   same-tab navigation to the real page, same as the gated links
+  //   always did.
   //   This MUST NOT go through the embedded iframe — IUB's login pages
   //   validate their CAPTCHA against the real my.iub.edu.pk /
   //   eportal.iub.edu.pk domain, and it will report "Invalid captcha
