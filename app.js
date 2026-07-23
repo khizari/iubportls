@@ -1,6 +1,4 @@
-// ===================== SCREEN FLOW: login -> welcome -> dashboard =====================
-const loginScreen = document.getElementById('loginScreen');
-const welcomeScreen = document.getElementById('welcomeScreen');
+// ===================== APP STATE =====================
 const dashboardScreen = document.getElementById('dashboardScreen');
 
 // Shared language state — read by anything rendered/updated via JS (as
@@ -9,18 +7,6 @@ const dashboardScreen = document.getElementById('dashboardScreen');
 let currentLang = 'en';
 let currentUserName = '';
 function t(en, ur){ return currentLang === 'ur' ? ur : en; }
-
-function escapeHtml(str){
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-function goToWelcome(name){
-  document.getElementById('welcomeGreeting').innerHTML = t('Welcome, ', 'خوش آمدید، ') + escapeHtml(name) + ' <span class="wave-emoji">👋</span>';
-  loginScreen.style.display = 'none';
-  welcomeScreen.style.display = 'flex';
-}
 
 // Picks the right greeting based on the current time of day.
 function timeOfDayGreeting(){
@@ -42,57 +28,18 @@ function updateGreeting(){
   }
 }
 
-function goToDashboard(name){
-  welcomeScreen.style.display = 'none';
-  dashboardScreen.style.display = 'block';
-  currentUserName = name;
-  const navPic = document.querySelector('.nav-profile .pic');
-  updateGreeting();
-  if(navPic && !navPic.querySelector('img')) navPic.textContent = name.charAt(0).toUpperCase();
-}
-
-function validateUsername(){
-  const input = document.getElementById('usernameInput');
-  const error = document.getElementById('usernameError');
-  const name = input.value.trim();
-  if(!name){
-    input.classList.add('error');
-    error.classList.add('show');
-    input.focus();
-    return null;
-  }
-  input.classList.remove('error');
-  error.classList.remove('show');
-  return name;
-}
-
-document.getElementById('usernameInput').addEventListener('input', (e) => {
-  if(e.target.value.trim()){
-    e.target.classList.remove('error');
-    document.getElementById('usernameError').classList.remove('show');
-  }
-});
-
-document.getElementById('loginBtn').addEventListener('click', () => {
-  const name = validateUsername();
-  if(name) goToWelcome(name);
-});
-document.getElementById('enterDashboardBtn').addEventListener('click', () => {
-  const name = validateUsername();
-  if(name) goToDashboard(name);
-});
-
-// ===================== PROFILE PHOTO: Camera + Browse Files =====================
-// Two avatar previews exist (login screen + settings panel), plus the small
-// nav-bar avatar — all three stay in sync whenever a new photo is chosen.
+// ===================== PROFILE PHOTO: Camera + Browse Files (Settings panel) =====================
 const avatarCircles = document.querySelectorAll('.avatar-circle-sm');
 const defaultAvatarHTML = avatarCircles[0].innerHTML;
+let currentAvatarDataUrl = null;
 function setAvatarImage(dataUrl){
+  currentAvatarDataUrl = dataUrl;
   avatarCircles.forEach(el => { el.innerHTML = `<img src="${dataUrl}" alt="Profile photo">`; });
   const navPic = document.querySelector('.nav-profile .pic');
   if(navPic) navPic.innerHTML = `<img src="${dataUrl}" alt="">`;
 }
 function resetAvatarImage(){
+  currentAvatarDataUrl = null;
   avatarCircles.forEach(el => { el.innerHTML = defaultAvatarHTML; });
 }
 function handlePhotoFile(file){
@@ -105,8 +52,6 @@ function handlePhotoFile(file){
   reader.onload = (e) => setAvatarImage(e.target.result);
   reader.readAsDataURL(file);
 }
-document.getElementById('browseBtn').addEventListener('click', () => document.getElementById('browseInput').click());
-document.getElementById('browseInput').addEventListener('change', (e) => handlePhotoFile(e.target.files[0]));
 document.getElementById('settingsBrowseBtn').addEventListener('click', () => document.getElementById('settingsBrowseInput').click());
 document.getElementById('settingsBrowseInput').addEventListener('change', (e) => handlePhotoFile(e.target.files[0]));
 
@@ -158,12 +103,10 @@ document.getElementById('cameraCaptureBtn').addEventListener('click', capturePho
 document.getElementById('cameraCancelBtn').addEventListener('click', closeCamera);
 cameraModal.addEventListener('click', (e) => { if(e.target === cameraModal) closeCamera(); });
 
-document.getElementById('cameraBtn').addEventListener('click', () => openCamera(document.getElementById('cameraInput')));
-document.getElementById('cameraInput').addEventListener('change', (e) => handlePhotoFile(e.target.files[0]));
 document.getElementById('settingsCameraBtn').addEventListener('click', () => openCamera(document.getElementById('settingsCameraInput')));
 document.getElementById('settingsCameraInput').addEventListener('change', (e) => handlePhotoFile(e.target.files[0]));
 
-// ===================== SETTINGS: EDIT NAME =====================
+// ===================== SETTINGS: EDIT NAME + PHOTO (Save persists both) =====================
 function applyNameChange(name){
   currentUserName = name;
   updateGreeting();
@@ -180,34 +123,55 @@ document.getElementById('settingsSaveNameBtn').addEventListener('click', () => {
   }
   input.classList.remove('error');
   applyNameChange(name);
-  showToast(t('Name updated', 'نام تبدیل ہو گیا'));
+  try{
+    localStorage.setItem('iub-username', name);
+    if(currentAvatarDataUrl) localStorage.setItem('iub-avatar', currentAvatarDataUrl);
+  }catch(e){}
+  showToast(t('Profile saved', 'پروفائل محفوظ ہو گئی'));
+  modal.classList.remove('show');
 });
 document.getElementById('settingsNameInput').addEventListener('input', (e) => {
   if(e.target.value.trim()) e.target.classList.remove('error');
 });
 
 const icons = {
-    entryTest: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8.5 12l2.2 2.2L16 9"/><line x1="8" y1="7" x2="16" y2="7"/>',
-    scholarship: '<path d="M2 9 12 4l10 5-10 5L2 9Z"/><path d="M6 11.2V16c0 1.4 2.7 2.8 6 2.8s6-1.4 6-2.8v-4.8"/><path d="M22 9v6.5"/>',
-    vouchers: '<path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4Z"/><line x1="10" y1="6" x2="10" y2="18" stroke-dasharray="2.4 2.4"/>',
-    admissions: '<path d="M12 6.2c-2-1.4-4.8-1.9-8-1.2v13c3.2-.7 6-.2 8 1.2 2-1.4 4.8-1.9 8-1.2V5c-3.2-.7-6-.2-8 1.2Z"/><line x1="12" y1="6.2" x2="12" y2="19.2"/>',
-    timetable: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
-    studentCard: '<rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2"/><line x1="14" y1="10" x2="18" y2="10"/><line x1="14" y1="14" x2="18" y2="14"/>',
-    societies: '<circle cx="8.5" cy="8" r="3.2"/><path d="M2.5 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M15.2 13.5c2.7.2 4.8 2.5 4.8 5.3"/>',
-    courses: '<rect x="5" y="3" width="14" height="18" rx="2"/><line x1="5" y1="8" x2="19" y2="8"/><line x1="9" y1="3" x2="9" y2="8"/>',
-    vehicle: '<path d="M5 17h14M5 17a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm14 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM3 17V9l2-5h14l2 5v8"/>',
-    rollNo: '<rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 3V2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="15" y2="14"/><line x1="9" y1="17.5" x2="13" y2="17.5"/>',
-    clearance: '<path d="M12 2.5 5 5.3v5.8c0 4.7 3 8.6 7 9.9 4-1.3 7-5.2 7-9.9V5.3Z"/><path d="M9 12l2 2 4-4.5"/>',
-    documents: '<path d="M3.5 7a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2Z"/>',
-    liveChat: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/>',
-    announcement: '<path d="M3 11v3a1 1 0 0 0 1 1h2l3.5 4V6L6 10H4a1 1 0 0 0-1 1Z"/><path d="M15 8a4 4 0 0 1 0 8"/><path d="M18 5a8 8 0 0 1 0 14"/>',
-    hostel: '<path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/>',
-    downloads: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
-    email: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/>',
-    contact: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>',
-    repeatCourse: '<path d="M17 2.5 21 6.5 17 10.5"/><path d="M3 12v-1.5A4 4 0 0 1 7 6.5h14"/><path d="M7 21.5 3 17.5 7 13.5"/><path d="M21 12v1.5a4 4 0 0 1-4 4H3"/>',
-    library: '<path d="M4 21V4a1 1 0 0 1 1-1h2.5v18"/><path d="M10.5 21V5.5a1 1 0 0 1 1-1H14a1 1 0 0 1 1 1V21"/><path d="M18 21V10a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v11"/>'
+    entryTest: '<rect x="4" y="2.5" width="16" height="19" rx="2.5"/><rect x="8" y="1" width="8" height="3" rx="1.2" fill-opacity="0.4"/><path d="M8 12.4l2.3 2.3 5.4-5.7" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
+    scholarship: '<path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.3V15c0 1.8 2.9 3.3 6 3.3s6-1.5 6-3.3v-4.7" fill-opacity="0.4"/><path d="M22 8v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>',
+    vouchers: '<rect x="2.5" y="6" width="19" height="12" rx="2.4"/><circle cx="2.7" cy="12" r="2.1" fill="#fff"/><circle cx="21.3" cy="12" r="2.1" fill="#fff"/><line x1="10" y1="7.4" x2="10" y2="16.6" stroke="#fff" stroke-width="1.5" stroke-dasharray="2 2"/>',
+    admissions: '<path d="M12 6c-2-1.3-4.6-1.8-7.6-1.2a1 1 0 0 0-.8 1V18a1 1 0 0 0 1.2 1c2.6-.5 4.9 0 6.7 1.3.3.2.7.2 1 0 1.8-1.3 4.1-1.8 6.7-1.3a1 1 0 0 0 1.2-1V5.8a1 1 0 0 0-.8-1c-3-.6-5.6-.1-7.6 1.2Z"/><path d="M12 6v14" stroke="#fff" stroke-width="1.3" stroke-opacity="0.55" fill="none"/>',
+    timetable: '<rect x="3" y="4.5" width="18" height="17" rx="2.4"/><rect x="3" y="4.5" width="18" height="5" rx="2.4" fill-opacity="0.4"/><rect x="7" y="2" width="2" height="4" rx="1"/><rect x="15" y="2" width="2" height="4" rx="1"/><circle cx="8" cy="14" r="1.2" fill="#fff"/><circle cx="12" cy="14" r="1.2" fill="#fff"/><circle cx="16" cy="14" r="1.2" fill="#fff"/><circle cx="8" cy="18" r="1.2" fill="#fff"/><circle cx="12" cy="18" r="1.2" fill="#fff"/>',
+    studentCard: '<rect x="2" y="5" width="20" height="14" rx="2.4"/><circle cx="8" cy="12" r="2.6" fill="#fff"/><rect x="13" y="9.3" width="6.5" height="1.7" rx="0.8" fill="#fff" fill-opacity="0.85"/><rect x="13" y="13" width="6.5" height="1.7" rx="0.8" fill="#fff" fill-opacity="0.85"/>',
+    societies: '<circle cx="8.5" cy="8" r="3.3"/><path d="M2.3 20c0-3.4 2.8-6.2 6.2-6.2s6.2 2.8 6.2 6.2" fill-opacity="0.4"/><circle cx="17" cy="9" r="2.5" fill-opacity="0.7"/><path d="M15 13.6c2.9.3 5.2 2.7 5.2 5.7" fill-opacity="0.4"/>',
+    courses: '<rect x="4" y="14" width="16" height="4" rx="1.2"/><rect x="5" y="9.5" width="14" height="4" rx="1.2" fill-opacity="0.75"/><rect x="6" y="5" width="12" height="4" rx="1.2" fill-opacity="0.5"/>',
+    vehicle: '<path d="M4 16.5h16v-2.7a2 2 0 0 0-.5-1.3l-2-2.4a2 2 0 0 0-1.5-.7H8a2 2 0 0 0-1.5.7l-2 2.4A2 2 0 0 0 4 13.8v2.7Z"/><rect x="4" y="16" width="16" height="3" rx="1.2" fill-opacity="0.6"/><circle cx="7.5" cy="19" r="1.7" fill="#fff"/><circle cx="16.5" cy="19" r="1.7" fill="#fff"/><rect x="7.5" y="11" width="9" height="2.4" rx="0.8" fill="#fff" fill-opacity="0.6"/>',
+    rollNo: '<rect x="6" y="2.5" width="12" height="19" rx="2.4"/><circle cx="12" cy="8" r="2.5" fill="#fff" fill-opacity="0.9"/><rect x="8.5" y="13" width="7" height="1.5" rx="0.7" fill="#fff" fill-opacity="0.6"/><rect x="8.5" y="16" width="7" height="1.5" rx="0.7" fill="#fff" fill-opacity="0.6"/>',
+    clearance: '<path d="M12 2.3 4.5 5.4v6.1c0 5 3.2 9 7.5 10.2 4.3-1.2 7.5-5.2 7.5-10.2V5.4L12 2.3Z"/><path d="M8.6 12.2l2.4 2.4 4.6-4.9" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
+    documents: '<path d="M4 6.4a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8.6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><rect x="6.5" y="11.5" width="11" height="1.5" rx="0.7" fill="#fff" fill-opacity="0.65"/><rect x="6.5" y="14.5" width="8" height="1.5" rx="0.7" fill="#fff" fill-opacity="0.65"/>',
+    liveChat: '<path d="M21 11.7a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-3.8-.9L3 21l1.7-4.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 12.3 3.5 8.5 8.5 0 0 1 21 11.7Z"/><circle cx="8.3" cy="11.7" r="1.1" fill="#fff"/><circle cx="12.3" cy="11.7" r="1.1" fill="#fff"/><circle cx="16.3" cy="11.7" r="1.1" fill="#fff"/>',
+    announcement: '<path d="M3 10.5v3a1.1 1.1 0 0 0 1.1 1.1h1.7l4 4.6V5.8l-4 4.7H4.1A1.1 1.1 0 0 0 3 10.5Z"/><path d="M14.7 7.7a5.2 5.2 0 0 1 0 8.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" fill="none" opacity="0.55"/><path d="M17.8 5.2a8.6 8.6 0 0 1 0 13.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" fill="none" opacity="0.35"/>',
+    hostel: '<path d="M4 21.5V10.2a1.2 1.2 0 0 1 .5-1L11.4 4a1.2 1.2 0 0 1 1.3 0l6.9 5.2a1.2 1.2 0 0 1 .5 1v11.3Z"/><rect x="9.5" y="14.5" width="5" height="7" rx="0.8" fill="#fff" fill-opacity="0.85"/><rect x="6.3" y="12" width="2.6" height="2.6" rx="0.5" fill="#fff" fill-opacity="0.55"/><rect x="15.1" y="12" width="2.6" height="2.6" rx="0.5" fill="#fff" fill-opacity="0.55"/>',
+    downloads: '<path d="M12 2.5v11.4" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" fill="none"/><path d="M7.3 9.4 12 14.1l4.7-4.7" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M4 15.5v3.7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3.7" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" fill="none" opacity="0.55"/>',
+    email: '<rect x="2.2" y="4.5" width="19.6" height="15" rx="2.2"/><path d="m3 6 9 6.3L21 6" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.9"/>',
+    contact: '<path d="M21.5 16.4v3a2 2 0 0 1-2.2 2 19.6 19.6 0 0 1-8.5-3 19.3 19.3 0 0 1-6-6 19.6 19.6 0 0 1-3-8.6A2 2 0 0 1 3.8 1.8h3a2 2 0 0 1 2 1.7c.13.95.36 1.88.69 2.77a2 2 0 0 1-.45 2.1l-1.27 1.27a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.1-.45c.9.33 1.83.56 2.78.69a2 2 0 0 1 1.7 2.03Z"/>',
+    repeatCourse: '<path d="M17 2.7 21 6.7l-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M3 12.2v-1.7A4 4 0 0 1 7 6.5h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.85"/><path d="M7 21.3 3 17.3l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M21 11.8v1.7a4 4 0 0 1-4 4H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.85"/>',
+    library: '<path d="M4 21V4.2a1 1 0 0 1 1-1h2.2V21Z"/><path d="M9.7 21V5.6a1 1 0 0 1 1-1h2.6a1 1 0 0 1 1 1V21Z" fill-opacity="0.7"/><path d="M17 21V9.3a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1V21Z" fill-opacity="0.45"/>'
   };
+
+  // A distinct accent color per Quick Link — makes the icon badges pop
+  // instead of all sharing one flat gold tone. Applied as CSS custom
+  // properties so the icon fill and badge background both derive from
+  // the same source color; kept vivid in both light and dark mode.
+  const iconColors = {
+    entryTest:'#4F46E5', scholarship:'#F59E0B', vouchers:'#10B981', admissions:'#E11D48',
+    timetable:'#0EA5E9', studentCard:'#8B5CF6', societies:'#EC4899', courses:'#14B8A6',
+    vehicle:'#F97316', rollNo:'#6366F1', clearance:'#22C55E', documents:'#3B82F6',
+    liveChat:'#25D366', announcement:'#F43F5E', hostel:'#A855F7', downloads:'#06B6D4',
+    email:'#EA4335', contact:'#0284C7', repeatCourse:'#D97706', library:'#7C3AED'
+  };
+  function hexToRgbTriplet(hex){
+    const n = parseInt(hex.replace('#',''), 16);
+    return [(n>>16)&255, (n>>8)&255, n&255].join(',');
+  }
 
 
   // Real IUB portal destinations (ported from the IUB Portals Android app)
@@ -240,11 +204,15 @@ const icons = {
   ];
 
   const banners = [
-    { text: 'ADMISSION<br>LAST DATE', textUr: 'داخلے کی<br>آخری تاریخ', image: 'assets/admission-last-date.jpg', url:'https://www.iub.edu.pk/admissions' },
-    { text: 'FEE<br>STRUCTURE', textUr: 'فیس کا<br>ڈھانچہ', image: 'assets/fee-structure.jpg', url:'https://www.iub.edu.pk/fee-structure' },
-    { text: 'MERIT<br>LIST', textUr: 'میرٹ<br>لسٹ', image: 'assets/merit-list.jpg', url:'https://eportal.iub.edu.pk/meritlists/index.php?p=' },
-    { text: 'TRANSPORT<br>SCHEDULE', textUr: 'ٹرانسپورٹ کا<br>شیڈول', image: 'assets/transport-schedule.jpg', url:'https://drive.google.com/file/d/1Cte7DZAqOdvqTKsnzE8nQJPbgL2jFs3r/view?usp=sharing' },
+    { text: 'ADMISSION<br>LAST DATE', textUr: 'داخلے کی<br>آخری تاریخ', image: 'assets/admission-last-date.webp', url:'https://www.iub.edu.pk/admissions' },
+    { text: 'FEE<br>STRUCTURE', textUr: 'فیس کا<br>ڈھانچہ', image: 'assets/fee-structure.webp', url:'https://www.iub.edu.pk/fee-structure' },
+    { text: 'MERIT<br>LIST', textUr: 'میرٹ<br>لسٹ', image: 'assets/merit-list.webp', url:'https://eportal.iub.edu.pk/meritlists/index.php?p=' },
+    { text: 'TRANSPORT<br>SCHEDULE', textUr: 'ٹرانسپورٹ کا<br>شیڈول', image: 'assets/transport-schedule.webp', url:'https://drive.google.com/file/d/1Cte7DZAqOdvqTKsnzE8nQJPbgL2jFs3r/view?usp=sharing' },
   ];
+  // Preload every banner photo into the browser cache right away, so
+  // setBanner() never shows the new caption before its photo has arrived —
+  // by the time the rotation reaches a slide, its image is already cached.
+  banners.forEach(b => { const preload = new Image(); preload.src = b.image; });
 
   const quickGrid = document.getElementById('quickGrid');
   const quickLinkCount = document.getElementById('quickLinkCount');
@@ -256,8 +224,10 @@ const icons = {
   quickLinks.forEach(item => {
     const el = document.createElement('div');
     el.className = 'quick-item' + (item.extra ? ' hidden-extra' : '');
+    const accent = iconColors[item.key] || '#F0B429';
+    const rgb = hexToRgbTriplet(accent);
     el.innerHTML = `
-      <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${icons[item.key]}</svg></span>
+      <span class="ic" style="--ic-color:${accent}; --ic-bg:rgba(${rgb},0.14); --ic-bg-hover:rgba(${rgb},0.3); --ic-border:rgba(${rgb},0.35);"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">${icons[item.key]}</svg></span>
       <span class="lbl" data-en="${item.label}" data-ur="${item.labelUr}">${item.label}</span>
     `;
     el.addEventListener('click', () => goTo(item));
@@ -408,32 +378,62 @@ const icons = {
   try{ savedLang = localStorage.getItem('iub-lang') || 'en'; }catch(e){}
   applyLanguage(savedLang);
 
+  // ===================== RESTORE SAVED PROFILE (name + photo) =====================
+  try{
+    const savedName = localStorage.getItem('iub-username');
+    if(savedName) applyNameChange(savedName);
+    const savedAvatar = localStorage.getItem('iub-avatar');
+    if(savedAvatar) setAvatarImage(savedAvatar);
+  }catch(e){}
+
   // Re-check the time-of-day greeting every few minutes in case the tab
   // stays open across a morning/afternoon/evening/night boundary.
   setInterval(updateGreeting, 5 * 60 * 1000);
 
-  // ===================== SETTINGS: SIGN OUT =====================
+  // ===================== SETTINGS: SIGN OUT (resets local profile info) =====================
   document.getElementById('signOutRow').addEventListener('click', () => {
     modal.classList.remove('show');
-    document.getElementById('usernameInput').value = '';
     resetAvatarImage();
     currentUserName = '';
+    document.getElementById('settingsNameInput').value = '';
     const navPic = document.querySelector('.nav-profile .pic');
     updateGreeting();
     if(navPic) navPic.textContent = '';
-    dashboardScreen.style.display = 'none';
-    welcomeScreen.style.display = 'none';
-    loginScreen.style.display = 'flex';
-    showToast('Signed out');
+    try{
+      localStorage.removeItem('iub-username');
+      localStorage.removeItem('iub-avatar');
+    }catch(e){}
+    showToast(t('Signed out', 'سائن آؤٹ ہو گیا'));
   });
 
+  const quickLinksHead = document.getElementById('quickLinksHead');
   document.getElementById('quickSearch').addEventListener('input', (e) => {
     const q = e.target.value.trim().toLowerCase();
+    const searching = q.length > 0;
+    const wasSearching = quickGrid.dataset.searching === '1';
     quickLinks.forEach((item, idx) => {
       const el = quickGrid.children[idx];
       const match = item.label.toLowerCase().includes(q);
       el.classList.toggle('search-hidden', !match);
+      // While searching, reveal any matching item even if it's normally
+      // tucked under "Show More" — otherwise those results would filter
+      // out along with everything else and the grid would collapse.
+      if(searching && item.extra){
+        el.classList.toggle('show', match);
+        if(match) el.classList.add('reveal-in');
+      }
     });
+    // Restore the collapsed/expanded state once the search is cleared.
+    if(!searching){
+      document.querySelectorAll('.hidden-extra').forEach(el => el.classList.toggle('show', expanded));
+    }
+    showMoreBtn.style.display = searching ? 'none' : '';
+    // The instant typing starts, bring the Quick Links section into view
+    // so results are visible without the person having to scroll manually.
+    if(searching && !wasSearching){
+      quickLinksHead.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    quickGrid.dataset.searching = searching ? '1' : '0';
   });
 
   // ===================== PORTAL VIEWER (in-app browser, ported from the app's WebView) =====================
@@ -461,9 +461,23 @@ const icons = {
   const portalTitle = document.getElementById('portalTitle');
   const portalOpenNew = document.getElementById('portalOpenNew');
   const portalProgress = document.getElementById('portalProgress');
+  const portalTopbar = document.getElementById('portalTopbar');
+  const minimizePortalBtn = document.getElementById('minimizePortal');
+  const maximizePortalBtn = document.getElementById('maximizePortal');
+
+  // Swaps the maximize button's icon between "expand" (enter full screen)
+  // and "compress" (restore) depending on current state.
+  const EXPAND_ICON = '<path d="M9 3H5a2 2 0 0 0-2 2v4M15 3h4a2 2 0 0 1 2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 21h4a2 2 0 0 0 2-2v-4"/>';
+  const COMPRESS_ICON = '<path d="M9 3v4a2 2 0 0 1-2 2H3M21 9h-4a2 2 0 0 1-2-2V3M3 15h4a2 2 0 0 1 2 2v4M15 21v-4a2 2 0 0 1 2-2h4"/>';
+  function setMaximizeIcon(isFullscreen){
+    maximizePortalBtn.querySelector('svg').innerHTML = isFullscreen ? COMPRESS_ICON : EXPAND_ICON;
+    maximizePortalBtn.title = isFullscreen ? t('Restore', 'بحال کریں') : t('Full screen', 'فل اسکرین');
+  }
 
   function openPortal(label, url){
     if(!url) return showToast(label + ' — link coming soon');
+    portalModal.classList.remove('minimized', 'fullscreen');
+    setMaximizeIcon(false);
     portalTitle.textContent = label;
     // "Open in new tab" always points at the real IUB URL, never the proxy
     portalOpenNew.href = url;
@@ -478,55 +492,66 @@ const icons = {
     portalModal.classList.add('show');
   }
 
-  // Central place that decides HOW a link opens:
-  // - external (non-IUB sites): new tab
-  // - gated (needs an IUB login): full same-tab navigation to the real
-  //   iub.edu.pk page — login/CAPTCHA work normally, and the session that
-  //   results is a real IUB session in the student's own browser, shared
-  //   automatically across any other page on that same subdomain
-  // - everything else (public IUB pages): embedded viewer, as before
+  // Every Quick Link (public, gated, or external) now opens inside the
+  // embedded portal viewer. The gated/external flags are kept on each
+  // item for reference (and for "Open in new tab" fallback inside the
+  // viewer), but no longer change how the link is launched here.
   function goTo(item){
     if(!item || !item.url) return showToast((item ? item.label : '') + ' — link coming soon');
     const label = t(item.label, item.labelUr);
-    if(item.external){
-      window.open(item.url, '_blank', 'noopener');
-    } else if(item.gated){
-      window.location.href = item.url;
-    } else {
-      openPortal(label, item.url);
-    }
+    openPortal(label, item.url);
   }
   portalFrame.addEventListener('load', () => {
     portalProgress.style.transition = 'width .3s ease';
     portalProgress.style.width = '100%';
     setTimeout(() => { portalProgress.style.opacity = '0'; }, 350);
   });
-  document.getElementById('closePortal').addEventListener('click', () => {
-    portalModal.classList.remove('show');
+  document.getElementById('closePortal').addEventListener('click', (e) => {
+    e.stopPropagation();
+    portalModal.classList.remove('show', 'minimized', 'fullscreen');
+    setMaximizeIcon(false);
     portalFrame.src = 'about:blank';
   });
   portalModal.addEventListener('click', (e) => { if(e.target === portalModal) document.getElementById('closePortal').click(); });
 
-  // Top shortcut row — EPortal / MyIUB / LMS. All three land on a login
-  // dashboard, so send the browser there directly (same as a gated
-  // quickLink) rather than through the embedded viewer.
-  document.getElementById('scEportal').addEventListener('click', () => { window.location.href = 'https://eportal.iub.edu.pk'; });
-  document.getElementById('scMyiub').addEventListener('click', () => { window.location.href = 'https://my.iub.edu.pk/cms'; });
-  document.getElementById('scLms').addEventListener('click', () => { window.location.href = 'https://lms.iub.edu.pk/my/'; });
+  // Minimize collapses the viewer into a small docked bar in the corner —
+  // the iframe keeps running behind it (no reload), and the rest of the
+  // app becomes usable again. Clicking the docked bar restores it.
+  minimizePortalBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    portalModal.classList.add('minimized');
+  });
+  portalTopbar.addEventListener('click', () => {
+    if(portalModal.classList.contains('minimized')) portalModal.classList.remove('minimized');
+  });
+
+  // Full screen expands the panel to fill the viewport; clicking again restores it.
+  maximizePortalBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isFullscreen = portalModal.classList.toggle('fullscreen');
+    setMaximizeIcon(isFullscreen);
+  });
+
+  // Top shortcut row — EPortal / MyIUB / LMS — now open in the same
+  // embedded portal viewer as everything else.
+  document.getElementById('scEportal').addEventListener('click', () => openPortal('EPortal', 'https://eportal.iub.edu.pk'));
+  document.getElementById('scMyiub').addEventListener('click', () => openPortal('MyIUB', 'https://my.iub.edu.pk/cms'));
+  document.getElementById('scLms').addEventListener('click', () => openPortal('LMS', 'https://lms.iub.edu.pk/my/'));
 
   // Banner is clickable — opens whichever slide is currently showing
   bannerEl.style.cursor = 'pointer';
   bannerEl.addEventListener('click', () => openPortal(banners[bIndex].text.replace('<br>', ' '), banners[bIndex].url));
 
 // ===================== CREATIVE ENHANCEMENTS: motion & effects =====================
-// Ripple feedback, card tilt, scroll-triggered reveals, and the login-screen
-// stat counters. Everything here backs off automatically for anyone with
-// prefers-reduced-motion set, and none of it is required for the app to work.
+// Ripple feedback, card tilt, scroll-triggered reveals, and count-up stat
+// numbers (used in the dashboard/settings). Everything here backs off
+// automatically for anyone with prefers-reduced-motion set, and none of it
+// is required for the app to work.
 (function(){
   const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ---- Ripple on click for buttons, pills and cards ----
-  const RIPPLE_SELECTOR = '.login-submit,.btn-navy,.btn-light,.sfc-btn,.close-settings,' +
+  const RIPPLE_SELECTOR = '.btn-navy,.btn-light,.sfc-link,.close-settings,' +
     '.shortcut-pill,.show-more-btn,.quick-item,.nav-icon-btn,.portal-icon-btn,.sidebar-close-btn,.portal-stuck-btn';
   function spawnRipple(el, x, y){
     const rect = el.getBoundingClientRect();

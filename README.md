@@ -1,4 +1,4 @@
-# IUB All In One Portal — Web App
+# IUB All In One Portals — Web App
 
 ## Structure
 ```
