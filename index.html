@@ -15,6 +15,27 @@
 </head>
 <body>
 
+  <!-- ===================== INTRO SPLASH (blue effects, plays once on first load) ===================== -->
+  <div id="introSplash" aria-hidden="true">
+    <div class="intro-light-seam"></div>
+    <div class="intro-door intro-door-left">
+      <div class="intro-door-panel"></div>
+      <div class="intro-door-edge"></div>
+    </div>
+    <div class="intro-door intro-door-right">
+      <div class="intro-door-panel"></div>
+      <div class="intro-door-edge"></div>
+    </div>
+    <div class="intro-content">
+      <div class="intro-logo"><img src="assets/logo.png" alt="IUB logo"></div>
+      <div class="intro-brand">
+        <span class="intro-name">IUB</span>
+        <span class="intro-tagline">All In One Portals</span>
+      </div>
+      <div class="intro-bar"><span class="intro-bar-fill"></span></div>
+    </div>
+  </div>
+
   <!-- ===================== DASHBOARD (loads directly, no sign-in/get-started step) ===================== -->
   <div id="dashboardScreen">
 
@@ -147,8 +168,8 @@
     <div class="main">
 
       <div class="shortcut-row" id="shortcutRow">
-        <button class="shortcut-pill" id="scEportal" data-en="EPortal" data-ur="ای پورٹل">EPortal</button>
-        <button class="shortcut-pill" id="scMyiub" data-en="MyIUB" data-ur="مائی آئی یو بی">MyIUB</button>
+        <button class="shortcut-pill" id="scEportal" data-en="E-Portals" data-ur="ای پورٹل">E-Portals</button>
+        <button class="shortcut-pill" id="scMyiub" data-en="My-IUB" data-ur="مائی آئی یو بی">My-IUB</button>
         <button class="shortcut-pill" id="scLms" data-en="LMS" data-ur="ایل ایم ایس">LMS</button>
       </div>
 
@@ -189,7 +210,12 @@
   <!-- ===================== SETTINGS PANEL ===================== -->
   <div class="settings-overlay" id="settingsModal">
     <div class="settings-panel">
-      <h3 data-en="Settings" data-ur="ترتیبات">Settings</h3>
+      <div class="settings-panel-header">
+        <h3 data-en="Settings" data-ur="ترتیبات">Settings</h3>
+        <button class="settings-close-btn" id="closeSettings" title="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
 
       <div class="settings-profile-edit">
         <label class="auth-label" data-en="Profile photo" data-ur="پروفائل فوٹو">Profile photo</label>
@@ -231,7 +257,6 @@
       <div class="modal-row danger" id="signOutRow">
         <span class="label" data-en="Sign Out" data-ur="سائن آؤٹ">Sign Out</span>
       </div>
-      <button class="close-settings" id="closeSettings" data-en="Close" data-ur="بند کریں">Close</button>
     </div>
   </div>
 

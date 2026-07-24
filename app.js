@@ -239,8 +239,8 @@ const icons = {
   // right above the first tile of each session group — keyed by the
   // first item's key in that group.
   const groupLabels = {
-    scholarship: { en: 'MyIUB Services', ur: 'مائی آئی یو بی سروسز' },
-    entryTest:   { en: 'EPortal Services', ur: 'ای پورٹل سروسز' },
+    scholarship: { en: 'My-IUB Services', ur: 'مائی آئی یو بی سروسز' },
+    entryTest:   { en: 'E-Portals Services', ur: 'ای پورٹل سروسز' },
     liveChat:    { en: 'No Login Needed', ur: 'لاگ ان کی ضرورت نہیں' },
   };
 
@@ -619,7 +619,7 @@ const icons = {
   const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ---- Ripple on click for buttons, pills and cards ----
-  const RIPPLE_SELECTOR = '.btn-navy,.btn-light,.sfc-link,.close-settings,' +
+  const RIPPLE_SELECTOR = '.btn-navy,.btn-light,.sfc-link,.settings-close-btn,' +
     '.shortcut-pill,.show-more-btn,.quick-item,.nav-icon-btn,.portal-icon-btn,.sidebar-close-btn,.portal-stuck-btn';
   function spawnRipple(el, x, y){
     const rect = el.getBoundingClientRect();
@@ -692,4 +692,34 @@ const icons = {
   document.querySelectorAll('[data-count]').forEach(el => {
     animateCounter(el, parseInt(el.getAttribute('data-count'), 10) || 0, 1100);
   });
+
+  // ===================== INTRO SPLASH (blue effects, first paint only) =====================
+  // Plays the animated navy/blue intro for a moment, then fades it out and
+  // reveals the dashboard underneath. Runs on every full page load (not
+  // stored/skipped via localStorage) so it's simple and predictable; if you
+  // only want it on the very first visit, gate it behind sessionStorage.
+  (function runIntroSplash(){
+    const splash = document.getElementById('introSplash');
+    if(!splash) return;
+
+    if(reducedMotion){
+      // Skip the door animation entirely — the dashboard is already
+      // visible underneath, just remove the (opaque) doors right away.
+      splash.remove();
+      return;
+    }
+
+    document.body.classList.add('intro-lock');
+    const MIN_DISPLAY_MS = 1400; // let the doors sit closed for a beat before opening
+    const DOOR_OPEN_MS = 900;    // matches the CSS transition duration on .intro-door
+
+    function openDoors(){
+      splash.classList.add('intro-open');
+      document.body.classList.remove('intro-lock');
+      // Fully remove once the doors have finished sliding out of view
+      setTimeout(() => splash.remove(), DOOR_OPEN_MS + 50);
+    }
+
+    window.setTimeout(openDoors, MIN_DISPLAY_MS);
+  })();
 })();
