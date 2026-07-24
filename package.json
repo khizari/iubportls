@@ -2,16 +2,11 @@
   "name": "zaz-collection-store",
   "version": "1.0.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+  "description": "ZAZ Collection clothing store with a password-protected admin panel for managing products (Vercel Functions + Vercel Blob storage).",
+  "engines": {
+    "node": ">=20.0.0"
   },
   "dependencies": {
-    "@vercel/blob": "^0.27.0",
-    "next": "14.2.35",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "@vercel/blob": "^2.5.0"
   }
 }

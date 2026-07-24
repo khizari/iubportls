@@ -1,0 +1,14 @@
+.out-of-stock-badge {
+	position: absolute;
+	top: 12px;
+	left: 12px;
+	background: rgba(0, 0, 0, 0.75);
+	color: #fff;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+	text-transform: uppercase;
+	padding: 5px 10px;
+	border-radius: 3px;
+	z-index: 5;
+}
